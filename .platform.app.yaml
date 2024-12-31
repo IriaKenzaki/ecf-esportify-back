@@ -19,7 +19,7 @@ runtime:
 build:
     flavor: none
 
-disk: 1024
+disk: 512
 
 web:
     locations:
@@ -35,7 +35,7 @@ mounts:
     
 relationships:
     database: 'database:mysql'
-
+    
 hooks:
     build: |
         set -x -e
