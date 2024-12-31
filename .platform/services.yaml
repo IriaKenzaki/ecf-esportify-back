@@ -1,6 +1,6 @@
 
 database:
-    type: oracle-mysql:8.0
+    type: mysql:8.0
     disk: 512
 
 

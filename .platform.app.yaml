@@ -34,9 +34,7 @@ mounts:
     "/var": { source: local, source_path: var }
     
 relationships:
-  oraclemysql:
-    service: oraclemysql
-    endpoint: mysql
+    database: 'database:mysql'
     
 hooks:
     build: |
