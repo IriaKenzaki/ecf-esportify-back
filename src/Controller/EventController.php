@@ -75,7 +75,7 @@ class EventController extends AbstractController
     }
     
     #[Route(methods: 'POST')]
-    #[IsGranted('ROLE_ORGANISATEUR', 'ROLE_ADMIN')]
+    #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Post(
         path: "/api/event",
         summary: "Créer un nouveau event",
