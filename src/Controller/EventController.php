@@ -74,7 +74,7 @@ class EventController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
     
-    #[Route('/', name: 'new', methods: 'POST')]
+    #[Route(methods: 'POST')]
     #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Post(
         path: "/api/event",
