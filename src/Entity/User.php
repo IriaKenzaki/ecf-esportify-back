@@ -18,8 +18,8 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\GeneratedValue(strategy: "IDENTITY")]
+    #[ORM\Column(type: "integer")]
     #[Groups("participant_details","user_details")]
     private ?int $id = null;
 

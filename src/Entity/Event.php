@@ -13,8 +13,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class Event
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\GeneratedValue(strategy: "IDENTITY")]
+    #[ORM\Column(type: "integer")]
     #[Groups(["user_events", "participant_details"])]
     private ?int $id = null;
 
