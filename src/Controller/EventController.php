@@ -75,7 +75,7 @@ class EventController extends AbstractController
     }
     
     #[Route(methods: 'POST')]
-    #[IsGranted('ROLE_ORGANISATEUR', 'ROLE_ADMIN')]
+    #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Post(
         path: "/api/event",
         summary: "Créer un nouveau event",
@@ -185,7 +185,7 @@ class EventController extends AbstractController
     }
     
     #[Route('/{id}', name: 'edit', methods: 'PUT')]
-    #[IsGranted('ROLE_ORGANISATEUR','ROLE_ADMIN')]
+    #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Put(
         path: '/api/event/{id}',
         summary: 'Modifier un évènement par ID',
@@ -237,7 +237,7 @@ class EventController extends AbstractController
     }
     
     #[Route('/{id}', name: 'delete', methods: 'DELETE')]
-    #[IsGranted('ROLE_ORGANISATEUR','ROLE_ADMIN')]
+    #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Delete(
         path: '/api/event/{id}',
         summary: 'Supprimer un évènement par ID',
@@ -565,7 +565,7 @@ class EventController extends AbstractController
     }
 
     #[Route('/api/my-created-events', name: 'user_created_events', methods: ['GET'])]
-    #[IsGranted('ROLE_ORGANISATEUR', 'ROLE_ADMIN')]
+    #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Get(
         path: "/api/event/api/my-created-events",
         summary: "Récupérer les événements créés par l'utilisateur connecté",
@@ -641,7 +641,7 @@ class EventController extends AbstractController
     }
 
     #[Route('/api/my-created-events-participants', name: 'my_created_events_participants', methods: ['GET'])]
-    #[IsGranted('ROLE_ORGANISATEUR','ROLE_ADMIN')]
+    #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Get(
         path: "/api/event/api/my-created-events-participants",
         summary: "Récupérer les événements créés par l'utilisateur et leurs participants",
