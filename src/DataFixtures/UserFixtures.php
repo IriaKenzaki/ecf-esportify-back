@@ -3,7 +3,6 @@
 namespace App\DataFixtures;
 
 use App\Entity\User;
-use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
@@ -18,30 +17,26 @@ class UserFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $adminUser = new User();
-        $adminUser->setUsername('admin')
-                  ->setEmail('admin@example.com')
+        $adminUser->setUsername('Armin')
+                  ->setEmail('armin@admin.com')
                   ->setRoles(['ROLE_ADMIN'])
-                  ->setPassword($this->passwordHasher->hashPassword($adminUser, 'adminpassword'));
+                  ->setPassword($this->passwordHasher->hashPassword($adminUser, 'arm1npa$$'));
 
         $orgaUser = new User();
-        $orgaUser->setUsername('organisateur')
-             ->setEmail('organisateur@example.com')
+        $orgaUser->setUsername('Camille')
+             ->setEmail('camille@orga.com')
              ->setRoles(['ROLE_ORGANISATEUR'])
-             ->setPassword($this->passwordHasher->hashPassword($orgaUser, 'organisateurpassword'));
+             ->setPassword($this->passwordHasher->hashPassword($orgaUser, 'c@mw0rd'));
 
-        for ($i = 1; $i <= 20; $i++) {
-            $user = (new User())
-                ->setUsername("Username $i")
-                ->setEmail("test.$i@test.com")
-                ->setCreatedAt(new DateTimeImmutable());
+             $user = new User();
+             $user->setUsername('Andréa')
+                  ->setEmail('andi@arthe.com')
+                  ->setRoles(['ROLE_USER'])
+                  ->setPassword($this->passwordHasher->hashPassword($orgaUser, '@ndya23'));
 
-            $user->setPassword($this->passwordHasher->hashPassword($user, 'password.$i'));
-
-            $manager->persist($user);
-            $manager->persist($adminUser);
-            $manager->persist($orgaUser);
-            $this->addReference("Username" . $i, $user);
-        }
+        $manager->persist($user);
+        $manager->persist($adminUser);
+        $manager->persist($orgaUser);
         $manager->flush();
     }
 }

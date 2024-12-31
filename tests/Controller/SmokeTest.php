@@ -7,18 +7,18 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 class SmokeTest extends WebTestCase
 {
     /* User organisateur for test:
-    *'email' => 'organisateur@example.com'
+    *'email' => 'camille@orga.com'
     *'username' => 'organisateur'
-    *'password' => 'organisateurpassword'
+    *'password' => 'c@mw0rd'
     *'ROLE_ORGANISATEUR'
     * User admin for test:
-    *'email' => 'admin@example.com'
-    *'username' => 'admin
-    *'password' => 'adminpassword'
+    *'email' => 'armin@admin.com'
+    *'username' => 'Armin'
+    *'password' => 'arm1npa$$'
     * User for test:
-    *'email' => 'test.1@test.com'
-    *'username' => 'Username 1
-    *'password' => 'password1'
+    *'email' => 'andi@arthe.com'
+    *'username' => 'Username 1'
+    *'password' => '@ndya23'
     * Il y as 20 ROLE_USER généré en base pour en utiliser un autre
     * il faudras changer le numero 1 du mail, de l'username et du mot de passe par un autre numero.
     */
@@ -42,8 +42,8 @@ class SmokeTest extends WebTestCase
         $client = self::createClient();
         $client->followRedirects(false);
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'test.1@test.com',
-            'password' => 'password1',
+            'username' => 'andi@arthe.com',
+            'password' => '@ndya23',
         ], JSON_THROW_ON_ERROR));
 
         
@@ -55,8 +55,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'admin@example.com',
-            'password' => 'adminpassword',
+            'username' => 'armin@admin.com',
+            'password' => 'arm1npa$$',
         ], JSON_THROW_ON_ERROR), 'GET', '/api/admin/users');
         self::assertResponseIsSuccessful();
 
@@ -67,11 +67,11 @@ class SmokeTest extends WebTestCase
         $client = self::createClient();
         $client->followRedirects(false);
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'admin@example.com',
-            'password' => 'adminpassword',
+            'username' => 'armin@admin.com',
+            'password' => 'arm1npa$$',
         ], JSON_THROW_ON_ERROR), 'POST', 'api/registration', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'test2@test.com',
-            'password' => 'toto', ], JSON_THROW_ON_ERROR), 'POST', "/api/admin/users/{3}/delete", );
+            'email' => 'test2@test.com',
+            'password' => 'toto', ], JSON_THROW_ON_ERROR), 'POST', "/api/admin/users/{4}/delete", );
 
         
         $statusCode = $client->getResponse()->getStatusCode();
@@ -83,8 +83,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'test.1@test.com',
-            'password' => 'password1',
+            'username' => 'andi@arthe.com',
+            'password' => '@ndya23',
         ], JSON_THROW_ON_ERROR), 'GET', '/api/account/me');
         
         $statusCode = $client->getResponse()->getStatusCode();
@@ -95,8 +95,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'organisateur@example.com',
-            'password' => 'organisateurpassword',
+            'username' => 'camille@orga.com',
+            'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée de jeux",
             "description" => "Venez passe un bon moment",
@@ -114,8 +114,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'organisateur@example.com',
-            'password' => 'organisateurpassword',
+            'username' => 'camille@orga.com',
+            'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée gaming",
             "description" => "Venez pour un moment",
@@ -134,8 +134,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'organisateur@example.com',
-            'password' => 'organisateurpassword',
+            'username' => 'camille@orga.com',
+            'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée des jeux",
             "description" => "Venez avec nous pour un bon moment",
@@ -161,8 +161,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'organisateur@example.com',
-            'password' => 'organisateurpassword',
+            'username' => 'camille@orga.com',
+            'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée de game",
             "description" => "Venez aux un bon moment",
@@ -180,8 +180,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'organisateur@example.com',
-            'password' => 'organisateurpassword',
+            'username' => 'camille@orga.com',
+            'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Journée jeux",
             "description" => "Allez pour un bon moment",
@@ -199,8 +199,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'organisateur@example.com',
-            'password' => 'organisateurpassword',
+            'username' => 'camille@orga.com',
+            'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée jeux",
             "description" => "Venez pour un bon moment",
@@ -218,8 +218,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'organisateur@example.com',
-            'password' => 'organisateurpassword',
+            'username' => 'camille@orga.com',
+            'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée jeux",
             "description" => "Venez pour un bon moment",
@@ -237,8 +237,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'organisateur@example.com',
-            'password' => 'organisateurpassword',
+            'username' => 'camille@orga.com',
+            'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée jeux",
             "description" => "Venez pour un bon moment",
@@ -256,8 +256,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'admin@example.com',
-            'password' => 'adminpassword',
+            'username' => 'armin@admin.com',
+            'password' => 'arm1npa$$',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée jeux",
             "description" => "Venez pour un bon moment",
@@ -275,8 +275,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'admin@example.com',
-            'password' => 'adminpassword',
+            'username' => 'armin@admin.com',
+            'password' => 'arm1npa$$',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée jeux",
             "description" => "Venez pour un bon moment",
@@ -295,8 +295,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'organisateur@example.com',
-            'password' => 'organisateurpassword',
+            'username' => 'camille@orga.com',
+            'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée jeux",
             "description" => "Venez pour un bon moment",
@@ -316,8 +316,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'test.1@test.com',
-            'password' => 'password1',
+            'username' => 'andi@arthe.com',
+            'password' => '@ndya23',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée jeux",
             "description" => "Venez pour un bon moment",
@@ -337,8 +337,8 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
-            'username' => 'admin@example.com',
-            'password' => 'adminpassword',
+            'username' => 'armin@admin.com',
+            'password' => 'arm1npa$$',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             "title" => "Soirée jeux",
             "description" => "Venez pour un bon moment",
