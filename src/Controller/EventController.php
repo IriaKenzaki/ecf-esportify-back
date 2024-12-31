@@ -139,9 +139,9 @@ class EventController extends AbstractController
         return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
-    #[Route('/{id}', name: 'show', methods: 'GET')]
+    #[Route('/{id}/details', name: 'show', methods: 'GET')]
     #[OA\Get(
-        path: "/api/event/{id}",
+        path: "/api/event/{id}/details",
         summary: "Afficher un event par son ID",
         tags: ["Events"],)]
         #[OA\Parameter(

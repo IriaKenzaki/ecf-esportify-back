@@ -36,7 +36,13 @@ security:
          - { path: ^/api/event/all, roles: PUBLIC_ACCESS }
          - { path: ^/api/doc, roles: PUBLIC_ACCESS }
          - { path: ^/api, roles : ROLE_USER }
+         - { path: ^/api/event/{id}/details, roles : ROLE_USER }
+         - { path: ^/api/event/api/my-events, roles : ROLE_USER }
+         - { path: ^/api/event/api/events/{eventId}/add-participant, roles : ROLE_USER }
+         - { path: ^/api/event/api/events/{eventId}/remove-participant, roles : ROLE_USER }
          - { path: ^/api/admin, roles : ROLE_ADMIN }
+         - { path: ^/api/event, roles : ROLE_ORGANISATEUR }
+         - { path: ^/api/events, roles : ROLE_ORGANISATEUR }
 
     role_hierarchy:
         ROLE_ADMIN: [ROLE_USER, ROLE_ORGANISATEUR]
