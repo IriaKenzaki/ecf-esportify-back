@@ -1,6 +1,6 @@
 
 database:
-    type: mysql:8.0.32
-    disk: 512
+    type: mysql: 8.0
+    disk: 1024
 
 
