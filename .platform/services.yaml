@@ -1,8 +1,8 @@
     database:
         type: mysql:10.6
         disk: 512
-    mongodb:
-    type: "mongodb:5.0"
-    disk: 512
-    configuration:
-        database: "avis_database"
+    database:
+        type: "mongodb:5.0"
+        disk: 512
+        configuration:
+            database: "avis_database"
