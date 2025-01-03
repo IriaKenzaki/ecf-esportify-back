@@ -6,6 +6,7 @@ runtime:
     extensions:
         - apcu
         - mbstring
+        - mongodb
         - sodium
         - ctype
         - iconv
