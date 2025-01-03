@@ -37,7 +37,7 @@ mounts:
 
 relationships:
     database: 'database:mysql'
-    mongodb: "mongodb:mongodb"
+    mongodb: "database:mongodb"
     
 
 hooks:
