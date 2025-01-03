@@ -4,5 +4,4 @@
     database:
         type: "mongodb:5.0"
         disk: 512
-        configuration:
-            database: "avis_database"
+        
