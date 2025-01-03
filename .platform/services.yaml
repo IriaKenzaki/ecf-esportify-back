@@ -1,7 +1,10 @@
     database:
-        type: mysql:10.6
-        disk: 512
-    mongodb-enterprise:
-        type: mongodb-enterprise:4.4
-        disk: 512
-        
+
+    services:
+        database:
+          type: mysql:10.6
+          disk: 512 
+          
+        mongodb:
+          type: mongodb:4.4  
+          disk: 512
