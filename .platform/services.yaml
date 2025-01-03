@@ -3,5 +3,5 @@
         disk: 512 
     
     mongodb-enterprise:
-        type: mongodb-enterprise:7.0  
+        type: mongodb-enterprise:4.4  
         disk: 512
