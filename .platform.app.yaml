@@ -38,8 +38,7 @@ mounts:
 
 relationships:
     database: 'database:mysql'
-    service: mongodb-enterprise
-        endpoint: mongodb
+    mongodb: "mongodb:mongodb"
     
 
 hooks:
