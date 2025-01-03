@@ -1,10 +1,8 @@
 
-    name: app
-
     services:
         database:
             type: mysql:10.6
             disk: 512
         mongodb:
-            type: mongodb:4.4   # Utiliser mongodb plutôt que mongodb-enterprise
+            type: mongodb:4.4
             disk: 512
