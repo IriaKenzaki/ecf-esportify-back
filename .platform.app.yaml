@@ -10,9 +10,7 @@ runtime:
         - sodium
         - ctype
         - iconv
-    env:
-        variables:
-            MONGODB_URL: 'mongodb://${env:PLATFORM_RELATIONSHIPS.mongodb[0].host}:${env:PLATFORM_RELATIONSHIPS.mongodb[0].port}/your_database_name'    
+   
 
 #variables:
 #    php:
@@ -38,7 +36,7 @@ mounts:
 
 relationships:
     database: 'database:mysql'
-    mongodb-enterprise: 'mongodb:mongodb'
+    mongodb: 'mongodb:mongodb'
     
 
 hooks:
