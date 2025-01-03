@@ -1,10 +1,8 @@
     database:
-
-    services:
-        database:
-          type: mysql:10.6
-          disk: 512 
-          
-        mongodb:
-          type: mongodb:4.4  
-          disk: 512
+        type: mysql:10.6
+        disk: 512 
+      
+    mongodb:
+        type: mongodb:4.4  
+        disk: 512
+        
