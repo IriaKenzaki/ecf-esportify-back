@@ -2,6 +2,6 @@
         type: mysql:10.6
         disk: 512
     mongodb:
-        type: mongodb:7.0
+        type: mongodb-entreprise:7.0
         disk: 512
         
