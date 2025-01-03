@@ -1,7 +1,7 @@
     database:
         type: mysql:10.6
         disk: 512
-    database:
+    mongodb:
         type: "mongodb:5.0"
         disk: 512
         
