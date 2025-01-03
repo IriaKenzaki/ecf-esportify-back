@@ -1,6 +1,6 @@
 name: app
 
-type: php:8.3
+type: php:8.4
 
 runtime:
     extensions:
@@ -9,7 +9,9 @@ runtime:
         - sodium
         - ctype
         - iconv
-        
+    env:
+        variables:
+            MONGODB_URL: 'mongodb://${env:PLATFORM_RELATIONSHIPS.mongodb[0].host}:${env:PLATFORM_RELATIONSHIPS.mongodb[0].port}/your_database_name'    
 
 #variables:
 #    php:
@@ -35,6 +37,7 @@ mounts:
 
 relationships:
     database: 'database:mysql'
+    mongodb: "mongodb:mongodb"
     
 
 hooks:
