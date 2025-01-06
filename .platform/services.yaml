@@ -2,6 +2,6 @@
         type: mysql:10.6
         disk: 512 
     
-    dbmongo:
+    mongodb:
         type: mongodb:6.0  
         disk: 512
