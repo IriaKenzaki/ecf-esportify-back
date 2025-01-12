@@ -27,18 +27,22 @@ class Event
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(["user_events"])]
     private ?int $players = null;
 
     #[ORM\Column]
+    #[Groups(["user_events"])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(["user_events"])]
     private ?\DateTimeInterface $dateTimeStart = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(["user_events"])]
     private ?\DateTimeInterface $dateTimeEnd = null;
 
     #[ORM\Column(length: 255)]
@@ -46,9 +50,11 @@ class Event
     private ?string $createdBy = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["user_events"])]
     private ?string $image = null;
 
     #[ORM\Column]
+    #[Groups(["user_events"])]
     private ?bool $visibility = null;
 
     #[ORM\OneToMany(mappedBy: 'event', targetEntity: ListParticipant::class, cascade: ['persist', 'remove'])]
