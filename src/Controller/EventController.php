@@ -164,8 +164,8 @@ class EventController extends AbstractController
             new OA\Property(property:"players", type:"integer", example:"100"),
             new OA\Property(property:"createdAt", type:"dateTimeImmutable", example:"2025-10-01T10:00:00+00:00"),
             new OA\Property(property:"updatedAt", type:"dateTimeImmutable", example:"2025-10-01T11:00:00+00:00"),
-            new OA\Property(property:"dateTimeStart", type:"dateTime", example:"2025-12-01T18:00:00"),
-            new OA\Property(property:"dateTimeEnd", type:"dateTime", example:"2025-12-01T19:00:00"),
+            new OA\Property(property:"dateTimeStart", type:"date-Time", example:"2025-12-01T18:00:00"),
+            new OA\Property(property:"dateTimeEnd", type:"date-Time", example:"2025-12-01T19:00:00"),
             new OA\Property(property:"createdBy", type:"string", example:"bibi"),
             new OA\Property(property:"game", type:"string", example:"Tetris"),
             new OA\Property(property:"image", type:"string", example:"Lien de l'image, non obligatoire"),
@@ -212,11 +212,11 @@ class EventController extends AbstractController
                 new OA\Property(property:"title", type:"string", example:"Nouveau nom de l'évènement"),
                 new OA\Property(property:"description", type:"string", example:"Nouvelle description"),
                 new OA\Property(property:"players", type:"integer", example:"100"),
-                new OA\Property(property:"dateTimeStart", type:"dateTime", example:"2025-12-01T18:00:00"),
-                new OA\Property(property:"dateTimeEnd", type:"dateTime", example:"2025-12-01T19:00:00"),
+                new OA\Property(property:"dateTimeStart", type:"date-Time", example:"2025-12-01T18:00:00"),
+                new OA\Property(property:"dateTimeEnd", type:"date-Time", example:"2025-12-01T19:00:00"),
                 new OA\Property(property:"game", type:"string", example:"Tetris"),
                 new OA\Property(property:"image", type:"string", example:"Lien de l'image, non obligatoire"),
-                new OA\Property(property:"visibility", type:"bool", example:"false")]
+                ]
             )
         ),
         responses: [
@@ -230,16 +230,28 @@ class EventController extends AbstractController
             )
         ]
     )]
-    public function edit(int $id): JsonResponse
-    {
-        $event = $this->repository->findOneBy(['id' => $id]);
+    public function edit(int $id, Request $request): JsonResponse
+{
+    $event = $this->repository->findOneBy(['id' => $id]);
 
-        if ($event) {
-            $this->manager->flush();
-            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-        }
+    if (!$event) {
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
+
+    $data = json_decode($request->getContent(), true);
+
+    $event->setTitle($data['title']);
+    $event->setDescription($data['description']);
+    $event->setPlayers($data['players']);
+    $event->setDateTimeStart(new \DateTimeImmutable($data['dateTimeStart']));
+    $event->setDateTimeEnd(new \DateTimeImmutable($data['dateTimeEnd']));
+    $event->setGame($data['game']);
+    $event->setImage($data['image']);
+
+    $this->manager->flush();
+
+    return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+}
     
     #[Route('/{id}', name: 'delete', methods: 'DELETE')]
     #[IsGranted('ROLE_ORGANISATEUR')]
