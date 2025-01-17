@@ -68,6 +68,10 @@ class Event
     #[ORM\OneToMany(targetEntity: Score::class, mappedBy: 'event', cascade: ['persist', 'remove'])]
     private Collection $scores;
 
+    #[ORM\Column(length: 64)]
+    #[Groups(["user_events"])]
+    private ?string $game = null;
+
     public function __construct()
     {
         $this->blacklist = new ArrayCollection();
@@ -203,5 +207,17 @@ class Event
     public function getScores(): Collection
     {
         return $this->scores;
+    }
+
+    public function getGame(): ?string
+    {
+        return $this->game;
+    }
+
+    public function setGame(string $game): static
+    {
+        $this->game = $game;
+
+        return $this;
     }
 }

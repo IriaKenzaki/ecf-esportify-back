@@ -53,6 +53,7 @@ class EventController extends AbstractController
             new OA\Property(property:"dateTimeStart", type:"dateTime", example:"2025-12-01T16:00:00"),
             new OA\Property(property:"dateTimeEnd", type:"dateTime", example:"2025-12-01T17:00:00"),
             new OA\Property(property:"createdBy", type:"string", example:"bibi"),
+            new OA\Property(property:"game", type:"string", example:"Tetris"),
             new OA\Property(property:"image", type:"string", example:"Lien de l'image, pas d'obligation"),
             new OA\Property(property:"visibility", type:"bool", example:"true")]
         )
@@ -90,6 +91,7 @@ class EventController extends AbstractController
                 new OA\Property(property:"players", type:"integer", example:"100"),
                 new OA\Property(property:"dateTimeStart", type:"date-Time", example:"2025-12-01T16:00:00"),
                 new OA\Property(property:"dateTimeEnd", type:"date-Time", example:"2025-12-01T17:00:00"),
+                new OA\Property(property:"game", type:"string", example:"Tetris"),
                 new OA\Property(property:"image", type:"string", example:"Lien ou non de l'image"),
                 new OA\Property(property:"visibility", type:"bool", example:"false")]
             ))]
@@ -107,6 +109,7 @@ class EventController extends AbstractController
             new OA\Property(property:"dateTimeStart", type:"date-Time", example:"2025-12-01T12:00:00"),
             new OA\Property(property:"dateTimeEnd", type:"date-Time", example:"2025-12-01T13:00:00"),
             new OA\Property(property:"createdBy", type:"string", example:"bibi"),
+            new OA\Property(property:"game", type:"string", example:"Tetris"),
             new OA\Property(property:"image", type:"string", example:"Lien de l'image"),
             new OA\Property(property:"visibility", type:"bool", example:"false")]
         )
@@ -164,6 +167,7 @@ class EventController extends AbstractController
             new OA\Property(property:"dateTimeStart", type:"dateTime", example:"2025-12-01T18:00:00"),
             new OA\Property(property:"dateTimeEnd", type:"dateTime", example:"2025-12-01T19:00:00"),
             new OA\Property(property:"createdBy", type:"string", example:"bibi"),
+            new OA\Property(property:"game", type:"string", example:"Tetris"),
             new OA\Property(property:"image", type:"string", example:"Lien de l'image, non obligatoire"),
             new OA\Property(property:"visibility", type:"bool", example:"true")]
         )
@@ -210,6 +214,7 @@ class EventController extends AbstractController
                 new OA\Property(property:"players", type:"integer", example:"100"),
                 new OA\Property(property:"dateTimeStart", type:"dateTime", example:"2025-12-01T18:00:00"),
                 new OA\Property(property:"dateTimeEnd", type:"dateTime", example:"2025-12-01T19:00:00"),
+                new OA\Property(property:"game", type:"string", example:"Tetris"),
                 new OA\Property(property:"image", type:"string", example:"Lien de l'image, non obligatoire"),
                 new OA\Property(property:"visibility", type:"bool", example:"false")]
             )
@@ -505,6 +510,7 @@ class EventController extends AbstractController
                         new OA\Property(property: "id", type: "integer", description: "ID de l'évent"),
                         new OA\Property(property: "title", type: "string", description: "Titre de l'évent"),
                         new OA\Property(property: "description", type: "string", description: "Description de l'événement"),
+                        new OA\Property(property: "game", type:"string", example:"Tetris"),
                         new OA\Property(property: "createdAt", type: "string", format: "date-time", description: "Date de création de l'évent"),
                     ])
             )
@@ -585,6 +591,7 @@ class EventController extends AbstractController
                         new OA\Property(property: "description", type: "string", description: "Description de l'événement"),
                         new OA\Property(property: "createdAt", type: "string", format: "date-time", description: "Date de création de l'événement"),
                         new OA\Property(property: "createdBy", type: "string", description: "Identifiant de l'utilisateur qui a créé l'événement"),
+                        new OA\Property(property: "game", type:"string", example:"Tetris"),
                     ]
                 )
         )
@@ -660,6 +667,7 @@ class EventController extends AbstractController
                     new OA\Property(property: "title", type: "string", description: "Titre de l'événement"),
                     new OA\Property(property: "createdAt", type: "string", format: "date-time", description: "Date de création de l'événement"),
                     new OA\Property(property: "createdBy", type: "string", description: "Identifiant de l'utilisateur qui a créé l'événement"),
+                    new OA\Property(property:"game", type:"string", example:"Tetris"),
                     new OA\Property(
                         property: "participants",
                         type: "object",
@@ -888,6 +896,8 @@ class EventController extends AbstractController
             new OA\Property(property:"players", type:"integer", example:"100"),
             new OA\Property(property:"dateTimeStart", type:"dateTime", example:"2025-12-01T18:00:00"),
             new OA\Property(property:"dateTimeEnd", type:"dateTime", example:"2025-12-01T19:00:00"),
+            new OA\Property(property:"game", type:"string", example:"Tetris"),
+            new OA\Property(property: "createdBy", type: "string", description: "Identifiant de l'utilisateur qui a créé l'événement"),
             new OA\Property(property:"image", type:"string", example:"Lien de l'image, non obligatoire"),
             new OA\Property(property:"visibility", type:"bool", example:"false")])
     )]
