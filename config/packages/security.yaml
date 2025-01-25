@@ -33,13 +33,13 @@ security:
     access_control:
          - { path: ^/api/registration, roles : PUBLIC_ACCESS }
          - { path: ^/api/login, roles: PUBLIC_ACCESS }
-         - { path: ^/api/event/all, roles: PUBLIC_ACCESS }
+         - { path: ^/api/all, roles: PUBLIC_ACCESS }
          - { path: ^/api/doc, roles: PUBLIC_ACCESS }
          - { path: ^/api, roles : ROLE_USER }
-         - { path: ^/api/event/[0-9]+/details, roles : ROLE_USER }
-         - { path: ^/api/event/api/my-events, roles : ROLE_USER }
-         - { path: ^/api/event/api/events/[0-9]+/add-participant, roles : ROLE_USER }
-         - { path: ^/api/event/api/events/[0-9]+/remove-participant, roles : ROLE_USER }
+         - { path: ^/api/[0-9]+/details, roles : ROLE_USER }
+         - { path: ^/api/my-events, roles : ROLE_USER }
+         - { path: ^/api/events/[0-9]+/add-participant, roles : ROLE_USER }
+         - { path: ^/api/events/[0-9]+/remove-participant, roles : ROLE_USER }
          - { path: ^/api/admin, roles : ROLE_ADMIN }
          - { path: ^/api/event, roles : ROLE_ORGANISATEUR }
          - { path: ^/api/events, roles : ROLE_ORGANISATEUR }

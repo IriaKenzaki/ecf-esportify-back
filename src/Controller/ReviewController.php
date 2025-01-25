@@ -10,6 +10,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('api', name:'app_api_')]
 class ReviewController extends AbstractController
 {
     private $dm;
@@ -20,7 +21,7 @@ class ReviewController extends AbstractController
 
     }
 
-    #[Route("/api/avis", methods: "POST")]
+    #[Route("/avis", methods: "POST")]
     #[OA\Post(
         path: "/api/avis",
         summary: "Créer un nouveau avis",
@@ -108,7 +109,7 @@ class ReviewController extends AbstractController
 
 
 
-    #[Route("/api/reviews", methods: "GET")]
+    #[Route("/reviews", methods: "GET")]
     #[OA\Get(
         path: "/api/reviews",
         summary: "Obtenir la liste des avis",

@@ -22,10 +22,10 @@ class AdminDashboardController extends AbstractController
     }
 
     
-    #[Route("/api/event/admin/dashboard", name: "admin_dashboard", methods: "GET")]
+    #[Route("/admin/dashboard", name: "admin_dashboard", methods: "GET")]
     #[IsGranted('ROLE_ADMIN')]
     #[OA\Get(
-        path: "/api/event/admin/dashboard",
+        path: "/api/admin/dashboard",
         summary: "Obtenir des statistiques pour le tableau de bord admin",
         tags: ["Admin"],
         parameters: [

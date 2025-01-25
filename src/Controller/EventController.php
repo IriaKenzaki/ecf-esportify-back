@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('api/event', name:'app_api_event_')]
+#[Route('api', name:'app_api_event_')]
 class EventController extends AbstractController
 {
     public function __construct(
@@ -36,7 +36,7 @@ class EventController extends AbstractController
 
     #[Route('/all', name: 'show_all', methods: 'GET')]
     #[OA\Get(
-        path: "/api/event/all",
+        path: "/api/all",
         summary: "Afficher touts les events en cours validés",
         tags: ["Public"])]
     #[OA\Response(
@@ -75,76 +75,109 @@ class EventController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
     
-    #[Route(methods: 'POST')]
-    #[IsGranted('ROLE_ORGANISATEUR')]
-    #[OA\Post(
-        path: "/api/event",
-        summary: "Créer un nouveau event",
-        tags: ["Events"],)]
-        #[OA\RequestBody(
-            required:true,
-            description:"Données de l'évènement à crée",
-            content: new OA\JsonContent(
-                type:"object",
-                properties:[new OA\Property(property:"title", type:"string", example:"Soirée jeux"),
-                new OA\Property(property:"description", type:"string", example:"Venez pour un bon moment"),
-                new OA\Property(property:"players", type:"integer", example:"100"),
-                new OA\Property(property:"dateTimeStart", type:"date-Time", example:"2025-12-01T16:00:00"),
-                new OA\Property(property:"dateTimeEnd", type:"date-Time", example:"2025-12-01T17:00:00"),
-                new OA\Property(property:"game", type:"string", example:"Tetris"),
-                new OA\Property(property:"image", type:"string", example:"Lien ou non de l'image"),
-                new OA\Property(property:"visibility", type:"bool", example:"false")]
-            ))]
-    #[OA\Response(
-        response:201,
-        description:"Evènement crée avec sucés.",
-        content: new OA\JsonContent(
-            type:"object",
-            properties : [new OA\Property(property:"id", type:"integer", example:"1"),
+    use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use App\Entity\Event;
+use DateTimeImmutable;
+
+#[Route('/event', name: 'event', methods: ['POST'])]
+#[IsGranted('ROLE_ORGANISATEUR')]
+#[OA\Post(
+    path: "/api/event",
+    summary: "Créer un nouveau event",
+    tags: ["Events"],
+)]
+#[OA\RequestBody(
+    required:true,
+    description:"Données de l'évènement à créer",
+    content: new OA\JsonContent(
+        type:"object",
+        properties:[
+            new OA\Property(property:"title", type:"string", example:"Soirée jeux"),
+            new OA\Property(property:"description", type:"string", example:"Venez pour un bon moment"),
+            new OA\Property(property:"players", type:"integer", example:"100"),
+            new OA\Property(property:"dateTimeStart", type:"date-time", example:"2025-12-01T16:00:00"),
+            new OA\Property(property:"dateTimeEnd", type:"date-time", example:"2025-12-01T17:00:00"),
+            new OA\Property(property:"game", type:"string", example:"Tetris"),
+            new OA\Property(property:"image", type:"string", example:"Lien ou non de l'image"),
+            new OA\Property(property:"visibility", type:"bool", example:"false")
+        ]
+    )
+)]
+#[OA\Response(
+    response: 201,
+    description: "Evènement créé avec succès.",
+    content: new OA\JsonContent(
+        type:"object",
+        properties:[
+            new OA\Property(property:"id", type:"integer", example:"1"),
             new OA\Property(property:"title", type:"string", example:"Soirée jeux de société"),
-            new OA\Property(property:"description", type:"string", example:"Venez passé un bon moment"),
+            new OA\Property(property:"description", type:"string", example:"Venez passer un bon moment"),
             new OA\Property(property:"players", type:"integer", example:"100"),
             new OA\Property(property:"createdAt", type:"dateTimeImmutable", example:"2025-10-01T10:00:00+00:00"),
             new OA\Property(property:"updatedAt", type:"dateTimeImmutable", example:"2025-10-01T11:00:00+00:00"),
-            new OA\Property(property:"dateTimeStart", type:"date-Time", example:"2025-12-01T12:00:00"),
-            new OA\Property(property:"dateTimeEnd", type:"date-Time", example:"2025-12-01T13:00:00"),
+            new OA\Property(property:"dateTimeStart", type:"date-time", example:"2025-12-01T12:00:00"),
+            new OA\Property(property:"dateTimeEnd", type:"date-time", example:"2025-12-01T13:00:00"),
             new OA\Property(property:"createdBy", type:"string", example:"bibi"),
             new OA\Property(property:"game", type:"string", example:"Tetris"),
             new OA\Property(property:"image", type:"string", example:"Lien de l'image"),
-            new OA\Property(property:"visibility", type:"bool", example:"false")]
-        )
+            new OA\Property(property:"visibility", type:"bool", example:"false")
+        ]
+    )
 )]
-   public function new(Request $request): JsonResponse
-    {
-        $event = $this->serializer->deserialize($request->getContent(), Event::class, 'json');
-        $event->setCreatedAt(new DateTimeImmutable());
+public function new(Request $request): JsonResponse
+{
+    $event = $this->serializer->deserialize($request->getContent(), Event::class, 'json');
 
-        $currentUser = $this->getUser();
-        if (!$currentUser) {
-            return new JsonResponse(['error' => 'Utilisateur non connecté'], Response::HTTP_UNAUTHORIZED);
-        }
-    
-        $event->setCreatedBy($currentUser->getUserIdentifier());
+    /** @var UploadedFile $imageFile */
+    $imageFile = $request->files->get('image');
 
-        $listParticipant = new ListParticipant();
-        $listParticipant->setEvent($event);
+    if ($imageFile) {
+        $imageFilename = uniqid() . '.' . $imageFile->getExtension();
         
-        $this->manager->persist($event);
-        $this->manager->persist($listParticipant);
-        $this->manager->flush();
-
-        $responseData = $this->serializer->serialize($event, 'json');
-        $location = $this->urlGenerator->generate(
-            'app_api_event_show',
-            ['id' => $event->getId()],
-            UrlGeneratorInterface::ABSOLUTE_URL,
+        $imageFile->move(
+            $this->getParameter('images_directory'),
+            $imageFilename
         );
-        return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
+        
+        $event->setImage($imageFilename);
+    } else {
+        $event->setImage(null);
     }
+
+    $event->setCreatedAt(new DateTimeImmutable());
+
+    $currentUser = $this->getUser();
+    if (!$currentUser) {
+        return new JsonResponse(['error' => 'Utilisateur non connecté'], Response::HTTP_UNAUTHORIZED);
+    }
+
+    $event->setCreatedBy($currentUser->getUserIdentifier());
+
+    $listParticipant = new ListParticipant();
+    $listParticipant->setEvent($event);
+
+    $this->manager->persist($event);
+    $this->manager->persist($listParticipant);
+    $this->manager->flush();
+
+    $responseData = $this->serializer->serialize($event, 'json');
+
+    $location = $this->urlGenerator->generate(
+        'app_api_event_show',
+        ['id' => $event->getId()],
+        UrlGeneratorInterface::ABSOLUTE_URL
+    );
+
+    return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
+}
+
 
     #[Route('/{id}/details', name: 'show', methods: 'GET')]
     #[OA\Get(
-        path: "/api/event/{id}/details",
+        path: "/api/{id}/details",
         summary: "Afficher un event par son ID",
         tags: ["Events"],)]
         #[OA\Parameter(
@@ -191,7 +224,7 @@ class EventController extends AbstractController
     #[Route('/{id}', name: 'edit', methods: 'PUT')]
     #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Put(
-        path: '/api/event/{id}',
+        path: '/api/{id}',
         summary: 'Modifier un évènement par ID',
         tags: ["Events"],
         parameters: [
@@ -256,7 +289,7 @@ class EventController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: 'DELETE')]
     #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Delete(
-        path: '/api/event/{id}',
+        path: '/api/{id}',
         summary: 'Supprimer un évènement par ID',
         tags: ["Events"],
         parameters: [
@@ -292,9 +325,9 @@ class EventController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
     
-    #[Route('/api/events/{eventId}/add-participant', name: 'event_add_participant', methods: 'POST')]
+    #[Route('/events/{eventId}/add-participant', name: 'event_add_participant', methods: 'POST')]
     #[OA\Post(
-        path: '/api/event/api/events/{eventId}/add-participant',
+        path: '/api/events/{eventId}/add-participant',
         summary: 'Inscription à un évènement',
         tags: ["Participants"],)]
     #[OA\Parameter(
@@ -372,9 +405,9 @@ class EventController extends AbstractController
     
     
 
-    #[Route('/api/events/{eventId}/remove-participant', name: 'event_remove_participant', methods: 'DELETE')]
+    #[Route('/events/{eventId}/remove-participant', name: 'event_remove_participant', methods: 'DELETE')]
     #[OA\Delete(
-        path: "/api/event/api/events/{eventId}/remove-participant",
+        path: "/api/events/{eventId}/remove-participant",
         summary: "Supprimer un participant d'un évènement",
         tags: ["Participants"],
         description: "Permet de retirer un utilisateur d'un événement. L'utilisateur doit être authentifié pour effectuer cette action.",
@@ -442,9 +475,9 @@ class EventController extends AbstractController
         return null;
     }
 
-    #[Route('/api/events/{id}/participants', name: 'event_participants', methods: 'GET')]
+    #[Route('/events/{id}/participants', name: 'event_participants', methods: 'GET')]
     #[OA\Get(
-        path: "/api/event/api/events/{id}/participants",
+        path: "/api/events/{id}/participants",
         summary: "Récupérer la liste des participants d'un évènement",
         tags: ["Participants"],
         description: "Permet de récupérer la liste des participants inscrits à un évènement. Si l'évènement n'existe pas ou n'a pas de participants, une erreur sera retournée.",
@@ -504,9 +537,9 @@ class EventController extends AbstractController
     }
 
 
-    #[Route('/api/my-events', name: 'user_events', methods: ['GET'])]
+    #[Route('/my-events', name: 'user_events', methods: ['GET'])]
     #[OA\Get(
-        path: "/api/event/api/my-events",
+        path: "/api/my-events",
         summary: "Récupérer les événements de l'utilisateur connecté",
         tags: ["Event Utilisateur"],
         description: "Permet de récupérer la liste des événements auxquels l'utilisateur actuellement connecté participe. Si l'utilisateur n'est pas authentifié, ou si aucun événement n'est trouvé pour cet utilisateur, une erreur sera retournée.",
@@ -582,10 +615,10 @@ class EventController extends AbstractController
         return new JsonResponse($responseData, $statusCode, [], $statusCode === Response::HTTP_OK);
     }
 
-    #[Route('/api/my-created-events', name: 'user_created_events', methods: ['GET'])]
+    #[Route('/my-created-events', name: 'user_created_events', methods: ['GET'])]
     #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Get(
-        path: "/api/event/api/my-created-events",
+        path: "/api/my-created-events",
         summary: "Récupérer les événements créés par l'utilisateur connecté",
         tags: ["Event Utilisateur"],
         description: "Permet de récupérer la liste des événements créés par l'utilisateur actuellement connecté. Si l'utilisateur n'est pas authentifié, ou si aucun événement n'a été créé par cet utilisateur, une erreur sera retournée.",
@@ -659,10 +692,10 @@ class EventController extends AbstractController
         return new JsonResponse($responseData, $statusCode, [], $statusCode === Response::HTTP_OK);
     }
 
-    #[Route('/api/my-created-events-participants', name: 'my_created_events_participants', methods: ['GET'])]
+    #[Route('/my-created-events-participants', name: 'my_created_events_participants', methods: ['GET'])]
     #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Get(
-        path: "/api/event/api/my-created-events-participants",
+        path: "/api/my-created-events-participants",
         summary: "Récupérer les événements créés par l'utilisateur et leurs participants",
         tags: ["Event Utilisateur"],
         description: "Permet de récupérer la liste des événements créés par l'utilisateur connecté, ainsi que les participants à ces événements et la liste noire associée (le cas échéant). Si l'utilisateur n'est pas authentifié ou aucun événement n'est trouvé, une erreur sera retournée.",
@@ -742,10 +775,10 @@ class EventController extends AbstractController
         return new JsonResponse($responseData, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/api/remove-participant/{eventId}/{participantId}', name: 'remove_participant', methods: ['DELETE'])]
+    #[Route('/remove-participant/{eventId}/{participantId}', name: 'remove_participant', methods: ['DELETE'])]
     #[IsGranted('ROLE_ORGANISATEUR','ROLE_ADMIN')]
     #[OA\Delete(
-        path: "/api/event/api/remove-participant/{eventId}/{participantId}",
+        path: "/api/remove-participant/{eventId}/{participantId}",
         summary: "Retirer un participant d'un événement et l'ajouter à la blacklist",
         tags: ["Participants"],
         description: "Cette route permet de retirer un participant d'un événement et de l'ajouter à la blacklist. Seul l'utilisateur qui a créé l'événement peut exécuter cette action.",
@@ -895,7 +928,7 @@ class EventController extends AbstractController
     #[Route('/all/not-visible', name: 'show_all_not_visible', methods: 'GET')]
     #[IsGranted('ROLE_ADMIN')]
     #[OA\Get(
-        path: "/api/event/all/not-visible",
+        path: "/api/all/not-visible",
         summary: "Afficher touts les events en cours non validés",
         tags: ["Admin"])]
     #[OA\Response(
@@ -935,7 +968,7 @@ class EventController extends AbstractController
     #[Route('/all/{id}', name: 'edit_all', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN')]
     #[OA\Put(
-        path: '/api/event/all/{id}',
+        path: '/api/all/{id}',
         summary: "Valider ou modifier la visibilité d'un évènement",
         tags: ["Admin"],
         parameters: [

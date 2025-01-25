@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 
+#[Route('api', name:'app_api_')]
 class ScoreController extends AbstractController{
     public function __construct(
         private EntityManagerInterface $manager,
@@ -25,10 +26,10 @@ class ScoreController extends AbstractController{
         private SerializerInterface $serializer,
         private UserRepository $userRepository){}
 
-    #[Route('api/events/{eventId}/add-scores', name: 'add_scores', methods: 'POST')]
+    #[Route('/{eventId}/add-scores', name: 'add_scores', methods: 'POST')]
     #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Post(
-        path: "/api/events/{eventId}/add-scores",
+        path: "/api/{eventId}/add-scores",
         summary: "Ajouter des scores pour un événement",
         description: "Cette route permet d'ajouter des scores pour les participants d'un événement spécifique.",
         tags: ["Scores"],
@@ -155,7 +156,7 @@ class ScoreController extends AbstractController{
         return isset($scoreData['username'], $scoreData['score']) && is_int($scoreData['score']);
     }
 
-    #[Route('api/scores', name: 'get_user_scores', methods: 'GET')]
+    #[Route('/scores', name: 'get_user_scores', methods: 'GET')]
     #[OA\Get(
         path: "/api/scores",
         summary : "Récupèrer Tous les scores de l'utilisateur",
