@@ -74,13 +74,6 @@ class EventController extends AbstractController
     
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
-    
-    use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
-use App\Entity\Event;
-use DateTimeImmutable;
 
 #[Route('/event', name: 'event', methods: ['POST'])]
 #[IsGranted('ROLE_ORGANISATEUR')]
