@@ -75,97 +75,114 @@ class EventController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
 
-#[Route('/event', name: 'event', methods: ['POST'])]
-#[IsGranted('ROLE_ORGANISATEUR')]
-#[OA\Post(
-    path: "/api/event",
-    summary: "Créer un nouveau event",
-    tags: ["Events"],
-)]
-#[OA\RequestBody(
-    required:true,
-    description:"Données de l'évènement à créer",
-    content: new OA\JsonContent(
-        type:"object",
-        properties:[
-            new OA\Property(property:"title", type:"string", example:"Soirée jeux"),
-            new OA\Property(property:"description", type:"string", example:"Venez pour un bon moment"),
-            new OA\Property(property:"players", type:"integer", example:"100"),
-            new OA\Property(property:"dateTimeStart", type:"date-time", example:"2025-12-01T16:00:00"),
-            new OA\Property(property:"dateTimeEnd", type:"date-time", example:"2025-12-01T17:00:00"),
-            new OA\Property(property:"game", type:"string", example:"Tetris"),
-            new OA\Property(property:"image", type:"string", example:"Lien ou non de l'image"),
-            new OA\Property(property:"visibility", type:"bool", example:"false")
-        ]
-    )
-)]
-#[OA\Response(
-    response: 201,
-    description: "Evènement créé avec succès.",
-    content: new OA\JsonContent(
-        type:"object",
-        properties:[
-            new OA\Property(property:"id", type:"integer", example:"1"),
-            new OA\Property(property:"title", type:"string", example:"Soirée jeux de société"),
-            new OA\Property(property:"description", type:"string", example:"Venez passer un bon moment"),
-            new OA\Property(property:"players", type:"integer", example:"100"),
-            new OA\Property(property:"createdAt", type:"dateTimeImmutable", example:"2025-10-01T10:00:00+00:00"),
-            new OA\Property(property:"updatedAt", type:"dateTimeImmutable", example:"2025-10-01T11:00:00+00:00"),
-            new OA\Property(property:"dateTimeStart", type:"date-time", example:"2025-12-01T12:00:00"),
-            new OA\Property(property:"dateTimeEnd", type:"date-time", example:"2025-12-01T13:00:00"),
-            new OA\Property(property:"createdBy", type:"string", example:"bibi"),
-            new OA\Property(property:"game", type:"string", example:"Tetris"),
-            new OA\Property(property:"image", type:"string", example:"Lien de l'image"),
-            new OA\Property(property:"visibility", type:"bool", example:"false")
-        ]
-    )
-)]
-public function new(Request $request): JsonResponse
-{
-    $event = $this->serializer->deserialize($request->getContent(), Event::class, 'json');
-
-    /** @var UploadedFile $imageFile */
-    $imageFile = $request->files->get('image');
-
-    if ($imageFile) {
-        $imageFilename = uniqid() . '.' . $imageFile->getExtension();
+    #[Route('/event', name: 'event', methods: ['POST'])]
+    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[OA\Post(
+        path: "/api/event",
+        summary: "Créer un nouveau event",
+        tags: ["Events"],
+    )]
+    #[OA\RequestBody(
+        required:true,
+        description:"Données de l'évènement à créer",
+        content: new OA\MediaType(
+            mediaType: "multipart/form-data",
+            schema: new OA\Schema(
+                type: "object",
+                properties: [
+                    new OA\Property(property: "title", type: "string", example: "Soirée jeux"),
+                    new OA\Property(property: "description", type: "string", example: "Venez pour un bon moment"),
+                    new OA\Property(property: "players", type: "integer", example: "100"),
+                    new OA\Property(property: "dateTimeStart", type: "string", example: "2025-12-01T16:00:00"),
+                    new OA\Property(property: "dateTimeEnd", type: "string", example: "2025-12-01T17:00:00"),
+                    new OA\Property(property: "game", type: "string", example: "Tetris"),
+                    new OA\Property(property: "image", type: "string", format: "binary", description: "Image de l'événement"),
+                    new OA\Property(property: "visibility", type: "bool", example: "false")
+                ]
+            )
+        )
+    )]
+    #[OA\Response(
+        response: 201,
+        description: "Evènement créé avec succès.",
+        content: new OA\JsonContent(
+            type: "object",
+            properties: [
+                new OA\Property(property: "id", type: "integer", example: "1"),
+                new OA\Property(property: "title", type: "string", example: "Soirée jeux de société"),
+                new OA\Property(property: "description", type: "string", example: "Venez passer un bon moment"),
+                new OA\Property(property: "players", type: "integer", example: "100"),
+                new OA\Property(property: "createdAt", type: "string", example: "2025-10-01T10:00:00+00:00"),
+                new OA\Property(property: "updatedAt", type: "string", example: "2025-10-01T11:00:00+00:00"),
+                new OA\Property(property: "dateTimeStart", type: "string", example: "2025-12-01T12:00:00"),
+                new OA\Property(property: "dateTimeEnd", type: "string", example: "2025-12-01T13:00:00"),
+                new OA\Property(property: "createdBy", type: "string", example: "bibi"),
+                new OA\Property(property: "game", type: "string", example: "Tetris"),
+                new OA\Property(property: "image", type: "string", example: "Lien de l'image"),
+                new OA\Property(property: "visibility", type: "bool", example: "false")
+            ]
+        )
+    )]
+    public function new(Request $request): JsonResponse
+    {
+        $title = $request->request->get('title');
+        $description = $request->request->get('description');
+        $players = $request->request->get('players');
+        $dateTimeStart = $request->request->get('dateTimeStart');
+        $dateTimeEnd = $request->request->get('dateTimeEnd');
+        $game = $request->request->get('game');
         
-        $imageFile->move(
-            $this->getParameter('images_directory'),
-            $imageFilename
+        $visibility = $request->request->get('visibility');
+        $visibility = filter_var($visibility, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if (is_null($visibility)) {
+            $visibility = false;
+        }
+    
+        $event = new Event();
+        $event->setTitle($title);
+        $event->setDescription($description);
+        $event->setPlayers($players);
+        $event->setDateTimeStart(new \DateTime($dateTimeStart));
+        $event->setDateTimeEnd(new \DateTime($dateTimeEnd));
+        $event->setGame($game);
+        $event->setVisibility($visibility);
+        
+        /** @var UploadedFile $imageFile */
+        $imageFile = $request->files->get('image');
+        if ($imageFile) {
+            $imageFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
+            $imageFile->move($this->getParameter('images_directory'), $imageFilename);
+            $event->setImage($imageFilename);
+        } else {
+            $event->setImage(null);
+        }
+        
+        $event->setCreatedAt(new \DateTimeImmutable());
+        
+        $currentUser = $this->getUser();
+        if (!$currentUser) {
+            return new JsonResponse(['error' => 'Utilisateur non connecté'], Response::HTTP_UNAUTHORIZED);
+        }
+        
+        $event->setCreatedBy($currentUser->getUserIdentifier());
+        
+        $listParticipant = new ListParticipant();
+        $listParticipant->setEvent($event);
+        
+        $this->manager->persist($event);
+        $this->manager->persist($listParticipant);
+        $this->manager->flush();
+        
+        $responseData = $this->serializer->serialize($event, 'json');
+        
+        $location = $this->urlGenerator->generate(
+            'app_api_event_show',
+            ['id' => $event->getId()],
+            UrlGeneratorInterface::ABSOLUTE_URL
         );
         
-        $event->setImage($imageFilename);
-    } else {
-        $event->setImage(null);
+        return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
     }
-
-    $event->setCreatedAt(new DateTimeImmutable());
-
-    $currentUser = $this->getUser();
-    if (!$currentUser) {
-        return new JsonResponse(['error' => 'Utilisateur non connecté'], Response::HTTP_UNAUTHORIZED);
-    }
-
-    $event->setCreatedBy($currentUser->getUserIdentifier());
-
-    $listParticipant = new ListParticipant();
-    $listParticipant->setEvent($event);
-
-    $this->manager->persist($event);
-    $this->manager->persist($listParticipant);
-    $this->manager->flush();
-
-    $responseData = $this->serializer->serialize($event, 'json');
-
-    $location = $this->urlGenerator->generate(
-        'app_api_event_show',
-        ['id' => $event->getId()],
-        UrlGeneratorInterface::ABSOLUTE_URL
-    );
-
-    return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
-}
 
 
     #[Route('/{id}/details', name: 'show', methods: 'GET')]
@@ -214,70 +231,87 @@ public function new(Request $request): JsonResponse
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
     
-    #[Route('/{id}', name: 'edit', methods: 'PUT')]
+    #[Route('/{id}', name: 'edit', methods: ['PUT'])]
     #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Put(
-        path: '/api/{id}',
-        summary: 'Modifier un évènement par ID',
-        tags: ["Events"],
-        parameters: [
-            new OA\Parameter(
-                name: 'id',
-                in: 'path',
-                required: true,
-                description: 'ID du l\'évènement à modifier',
-                schema: new OA\Schema(type: 'integer')
-            )
-        ],
-        requestBody: new OA\RequestBody(
-            required: true,
-            description: "Nouvelles données de l'évènement à mettre à jour",
-            content: new OA\JsonContent(
-                type: 'object',
+        path: "/api/{id}",
+        summary: "Modifier un événement",
+        tags: ["Events"]
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: "application/json",
+            schema: new OA\Schema(
+                type: "object",
                 properties: [
-                new OA\Property(property:"title", type:"string", example:"Nouveau nom de l'évènement"),
-                new OA\Property(property:"description", type:"string", example:"Nouvelle description"),
-                new OA\Property(property:"players", type:"integer", example:"100"),
-                new OA\Property(property:"dateTimeStart", type:"date-Time", example:"2025-12-01T18:00:00"),
-                new OA\Property(property:"dateTimeEnd", type:"date-Time", example:"2025-12-01T19:00:00"),
-                new OA\Property(property:"game", type:"string", example:"Tetris"),
-                new OA\Property(property:"image", type:"string", example:"Lien de l'image, non obligatoire"),
+                    new OA\Property(property: "title", type: "string", example: "Soirée jeux modifiée"),
+                    new OA\Property(property: "description", type: "string", example: "Venez passer un bon moment"),
+                    new OA\Property(property: "players", type: "integer", example: "150"),
+                    new OA\Property(property: "dateTimeStart", type: "string", example: "2025-12-01T16:00:00"),
+                    new OA\Property(property: "dateTimeEnd", type: "string", example: "2025-12-01T18:00:00"),
+                    new OA\Property(property: "game", type: "string", example: "Tetris"),
+                    new OA\Property(property: "visibility", type: "boolean", example: "true")
                 ]
             )
-        ),
-        responses: [
-            new OA\Response(
-                response: 204,
-                description: 'Evènement modifié avec succès'
-            ),
-            new OA\Response(
-                response: 404,
-                description: 'Evènement non trouvé'
-            )
-        ]
+        )
+    )]
+    #[OA\Response(
+        response: 204,
+        description: "Evénement modifié avec succès"
+    )]
+    #[OA\Response(
+        response: 404,
+        description: "Evénement non trouvé"
     )]
     public function edit(int $id, Request $request): JsonResponse
-{
-    $event = $this->repository->findOneBy(['id' => $id]);
+    {
+        // Récupérer l'événement par son ID
+        $event = $this->repository->findOneBy(['id' => $id]);
 
-    if (!$event) {
-        return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        if (!$event) {
+            return new JsonResponse(['error' => 'Événement non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Récupération des données JSON envoyées dans la requête
+        $data = json_decode($request->getContent(), true); // Décode les données JSON
+
+        if (isset($data['title'])) {
+            $event->setTitle($data['title']);
+        }
+        if (isset($data['description'])) {
+            $event->setDescription($data['description']);
+        }
+        if (isset($data['players'])) {
+            $event->setPlayers($data['players']);
+        }
+        if (isset($data['dateTimeStart'])) {
+            $event->setDateTimeStart(new \DateTime($data['dateTimeStart']));
+        }
+        if (isset($data['dateTimeEnd'])) {
+            $event->setDateTimeEnd(new \DateTime($data['dateTimeEnd']));
+        }
+        if (isset($data['game'])) {
+            $event->setGame($data['game']);
+        }
+        if (isset($data['visibility'])) {
+            $event->setVisibility(filter_var($data['visibility'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE));
+        }
+
+        // Gestion de l'image
+        /** @var UploadedFile $imageFile */
+        $imageFile = $request->files->get('image');
+        if ($imageFile) {
+            $imageFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
+            $imageFile->move($this->getParameter('images_directory'), $imageFilename);
+            $event->setImage($imageFilename);
+        }
+
+        // Sauvegarder les modifications
+        $this->manager->flush();
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
-
-    $data = json_decode($request->getContent(), true);
-
-    $event->setTitle($data['title']);
-    $event->setDescription($data['description']);
-    $event->setPlayers($data['players']);
-    $event->setDateTimeStart(new \DateTimeImmutable($data['dateTimeStart']));
-    $event->setDateTimeEnd(new \DateTimeImmutable($data['dateTimeEnd']));
-    $event->setGame($data['game']);
-    $event->setImage($data['image']);
-
-    $this->manager->flush();
-
-    return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-}
     
     #[Route('/{id}', name: 'delete', methods: 'DELETE')]
     #[IsGranted('ROLE_ORGANISATEUR')]
