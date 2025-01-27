@@ -837,7 +837,7 @@ class EventController extends AbstractController
     }
 
     #[Route('/remove-participant/{eventId}/{participantId}', name: 'remove_participant', methods: ['DELETE'])]
-    #[IsGranted('ROLE_ORGANISATEUR','ROLE_ADMIN')]
+    #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Delete(
         path: "/api/remove-participant/{eventId}/{participantId}",
         summary: "Retirer un participant d'un événement et l'ajouter à la blacklist",
