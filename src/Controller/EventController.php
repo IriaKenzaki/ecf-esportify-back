@@ -231,7 +231,7 @@ class EventController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
     
-    #[Route('/{id}', name: 'edit', methods: ['PUT'])]
+    #[Route('/{id}', name: 'edit_event', methods: ['PUT'])]
     #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Put(
         path: "/api/{id}",
@@ -258,23 +258,21 @@ class EventController extends AbstractController
     )]
     #[OA\Response(
         response: 204,
-        description: "Evénement modifié avec succès"
+        description: "Événement modifié avec succès"
     )]
     #[OA\Response(
         response: 404,
-        description: "Evénement non trouvé"
+        description: "Événement non trouvé"
     )]
-    public function edit(int $id, Request $request): JsonResponse
+    public function editEvent(int $id, Request $request): JsonResponse
     {
-        // Récupérer l'événement par son ID
         $event = $this->repository->findOneBy(['id' => $id]);
 
         if (!$event) {
             return new JsonResponse(['error' => 'Événement non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
-        // Récupération des données JSON envoyées dans la requête
-        $data = json_decode($request->getContent(), true); // Décode les données JSON
+        $data = json_decode($request->getContent(), true);
 
         if (isset($data['title'])) {
             $event->setTitle($data['title']);
@@ -298,21 +296,57 @@ class EventController extends AbstractController
             $event->setVisibility(filter_var($data['visibility'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE));
         }
 
-        // Gestion de l'image
-        /** @var UploadedFile $imageFile */
-        $imageFile = $request->files->get('image');
-        if ($imageFile) {
-            $imageFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
-            $imageFile->move($this->getParameter('images_directory'), $imageFilename);
-            $event->setImage($imageFilename);
-        }
-
-        // Sauvegarder les modifications
         $this->manager->flush();
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
     
+    #[Route('/{id}/image', name: 'edit_event_image', methods: ['POST'])]
+    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[OA\Post(
+        path: "/api/{id}/image",
+        summary: "Mettre à jour l'image de l'événement",
+        tags: ["Events"]
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: "multipart/form-data",
+            schema: new OA\Schema(
+                type: "object",
+                properties: [
+                    new OA\Property(property: "image", type: "string", format: "binary", description: "Image de l'événement"),
+                ]
+            )
+        )
+    )]
+    #[OA\Response(
+        response: 204,
+        description: "Image de l'événement mise à jour avec succès"
+    )]
+    #[OA\Response(
+        response: 404,
+        description: "Événement non trouvé"
+    )]
+    public function editEventImage(int $id, Request $request): JsonResponse
+    {
+        $event = $this->repository->findOneBy(['id' => $id]);
+    
+        if (!$event) {
+            return new JsonResponse(['error' => 'Événement non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+    
+        $imageFile = $request->files->get('image');
+        if ($imageFile) {
+            $imageFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
+            $imageFile->move($this->getParameter('images_directory'), $imageFilename);
+            $event->setImage($imageFilename);
+            $this->manager->flush();
+        }
+    
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+
     #[Route('/{id}', name: 'delete', methods: 'DELETE')]
     #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Delete(

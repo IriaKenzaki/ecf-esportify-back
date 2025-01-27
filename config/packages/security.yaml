@@ -43,6 +43,7 @@ security:
          - { path: ^/api/admin, roles : ROLE_ADMIN }
          - { path: ^/api/event, roles : ROLE_ORGANISATEUR }
          - { path: ^/api/events, roles : ROLE_ORGANISATEUR }
+         - { path: ^/api/[0-9]+/image, roles : ROLE_ORGANISATEUR }
 
     role_hierarchy:
         ROLE_ADMIN: [ROLE_USER, ROLE_ORGANISATEUR]
