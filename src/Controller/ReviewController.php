@@ -159,4 +159,50 @@ class ReviewController extends AbstractController
 
         return new JsonResponse($response);
     }
+
+    #[Route("/avis/{id}", methods: "DELETE")]
+    #[IsGranted('ROLE_USER')]
+    #[OA\Delete(
+        path: "/api/avis/{id}",
+        summary: "Supprimer un avis par son ID",
+        tags: ["Avis"]
+    )]
+    #[OA\Parameter(
+        name: "id",
+        in: "path",
+        required: true,
+        description: "ID de l'avis à supprimer",
+        schema: new OA\Schema(type: "string")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Avis supprimé avec succès."
+    )]
+    #[OA\Response(
+        response: 404,
+        description: "Avis introuvable."
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "L'utilisateur n'est pas connecté."
+    )]
+    public function deleteAvis(string $id): JsonResponse
+    {
+        $currentUser = $this->getUser();
+
+        if (!$currentUser) {
+            return new JsonResponse(['error' => 'L\'utilisateur n\'est pas connecté.'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+        $review = $this->dm->getRepository(Review::class)->find($id);
+        if (!$review) {
+            return new JsonResponse(['error' => 'Avis introuvable.'], JsonResponse::HTTP_NOT_FOUND);
+        }
+        if (!$this->isGranted('ROLE_ADMIN') && $review->getUser() !== $currentUser->getUserIdentifier()) {
+            return new JsonResponse(['error' => 'Vous n\'avez pas la permission de supprimer cet avis.'], JsonResponse::HTTP_FORBIDDEN);
+        }
+        $this->dm->remove($review);
+        $this->dm->flush();
+
+        return new JsonResponse(['message' => 'Avis supprimé avec succès.'], JsonResponse::HTTP_OK);
+    }
 }
