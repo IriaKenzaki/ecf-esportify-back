@@ -20,7 +20,7 @@ class Review
     #[Assert\Length(min: 10)]
     private $content;
 
-    #[MongoDB\Field(type: 'integer')]
+    #[MongoDB\Field(type: 'int')]
     #[Assert\NotBlank]
     #[Assert\Range(min: 1, max: 5)]
     private $rating;
