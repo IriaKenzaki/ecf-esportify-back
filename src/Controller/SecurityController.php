@@ -188,22 +188,13 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    #[Route("/admin/users", name: "admin_list_users", methods: ["POST"])]
+    #[Route("/admin/users", name: "admin_list_users", methods: ["GET"])]
     #[IsGranted('ROLE_ADMIN')]
-    #[OA\Post(
+    #[OA\Get(
         path: "/api/admin/users",
-        summary: "Récupérer la liste des utilisateurs avec recherche par username",
+        summary: "Récupérer la liste des utilisateurs.",
         tags: ["Admin"],
-        requestBody: new OA\RequestBody(
-            description: "Requête pour rechercher les utilisateurs par username",
-            required: false,
-            content: new OA\JsonContent(
-                type: "object",
-                properties: [
-                    new OA\Property(property: "username", type: "string", example: "john_doe")
-                ]
-            )
-        ),
+        
         responses: [
             new OA\Response(
                 response: 200,
@@ -247,83 +238,97 @@ class SecurityController extends AbstractController
         return new JsonResponse($response, Response::HTTP_OK);
     }
 
-    #[Route("/admin/users/edit", name: "admin_edit_user", methods: ["POST"])]
+    #[Route("/admin/users/edit/{id}", name: "admin_edit_user", methods: ["PUT"])]
     #[IsGranted('ROLE_ADMIN')]
-    #[OA\Post(
-        path: "/api/admin/users/edit",
+    #[OA\Put(
+        path: "/api/admin/users/edit/{id}",
         summary: "Modifier un utilisateur",
         tags: ["Admin"],
-        requestBody: new OA\RequestBody(
-            description: "Requête pour modifier un utilisateur",
+    )]
+        #[OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 type: "object",
                 properties: [
                     new OA\Property(property: "username", type: "string", example: "john_doe"),
-                    new OA\Property(property: "role", type: "string", enum: ["ROLE_USER", "ROLE_ORGANISATEUR", "ROLE_ADMIN"], example: "ROLE_ADMIN")
-                ]
-            )
+                    new OA\Property(property: "role", type: "string", enum: ["ROLE_USER", "ROLE_ORGANISATEUR", "ROLE_ADMIN"], example: "ROLE_ADMIN"),
+                    new OA\Property(property: "email", type: "string", example: "john_doe@example.com")
+                ]          
         ),
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: "Utilisateur modifié avec succès"
-            ),
-            new OA\Response(
-                response: 404,
-                description: "Utilisateur introuvable"
-            ),
-            new OA\Response(
-                response: 400,
-                description: "Requête invalide"
-            )
-        ]
     )]
-    public function editUser(Request $request): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
+    #[OA\Response(
+            response: 200,
+            description: "Utilisateur modifié avec succès"
+    )]
+    #[OA\Response(
+            response: 404,
+            description: "Utilisateur introuvable"
+    )]
+    #[OA\Response(
+            response: 400,
+            description: "Requête invalide"
+    )]
 
+    public function editUser(int $id, Request $request): JsonResponse
+    {
+        $user = $this->userRepository->find($id);
+        $data = json_decode($request->getContent(), true);
+    
+        if (!$id) {
+            return new JsonResponse(['message' => 'L\'ID de l\'utilisateur est requis.'], Response::HTTP_BAD_REQUEST);
+        }
+    
         $response = [];
         $statusCode = Response::HTTP_BAD_REQUEST;
-
+    
         $username = $data['username'] ?? null;
         $role = $data['role'] ?? null;
-
-        if (!$this->validateRequestForEdit($username, $role)) {
-            $response = ['message' => 'Requête invalide. Vérifiez les paramètres.'];
-        } else {
-            $user = $this->userRepository->findOneBy(['username' => $username]);
-
-            if (!$user) {
-                $response = ['message' => 'Utilisateur introuvable.'];
-                $statusCode = Response::HTTP_NOT_FOUND;
-            } else {
-                [$response, $statusCode] = $this->updateUserRole($user, $role);
-            }
-        }
-
+        $email = $data['email'] ?? null;
+    
+    if (!$this->validateRequestForEdit($username, $role, $email)) {
+        $response = ['message' => 'Requête invalide. Vérifiez les paramètres.'];
+        $statusCode = Response::HTTP_BAD_REQUEST;
+    } else {
+        $updatedRole = $role ?? $user->getRoles()[0];
+        $updatedEmail = $email ?? $user->getEmail();          
+        [$response, $statusCode] = $this->updateUser($user, $username, $updatedRole, $updatedEmail);
+    }
+    
         return new JsonResponse($response, $statusCode);
     }
-
-    private function validateRequestForEdit(?string $username, ?string $role): bool
+    
+    private function validateRequestForEdit(?string $username, ?string $role, ?string $email): bool
     {
-        if (!$username || !$role) {
+        if ($username && !$username) {
             return false;
         }
-
-        if (!in_array($role, ['ROLE_USER', 'ROLE_ORGANISATEUR', 'ROLE_ADMIN'])) {
+    
+        if ($role && !in_array($role, ['ROLE_USER', 'ROLE_ORGANISATEUR', 'ROLE_ADMIN'])) {
             return false;
         }
-
+    
+        if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+    
         return true;
     }
-
-    private function updateUserRole($user, string $role): array
+    
+    private function updateUser($user, ?string $username, string $role, string $email): array
     {
-        $user->setRoles([$role]);
+        if ($username) {
+            $user->setUsername($username);
+        }
+        if ($role) {
+            $user->setRoles([$role]);
+        }
+        if ($email) {
+            $user->setEmail($email);
+        }
+    
         $this->manager->flush();
-
-        return [['message' => 'Rôle mis à jour avec succès.'], Response::HTTP_OK];
+    
+        return [['message' => 'Utilisateur mis à jour avec succès.'], Response::HTTP_OK];
     }
 
     #[Route("/admin/users/{id}/delete", name: "admin_delete_user", methods: ["DELETE"])]
