@@ -55,7 +55,8 @@ class EventController extends AbstractController
             new OA\Property(property:"createdBy", type:"string", example:"bibi"),
             new OA\Property(property:"game", type:"string", example:"Tetris"),
             new OA\Property(property:"image", type:"string", example:"Lien de l'image, pas d'obligation"),
-            new OA\Property(property:"visibility", type:"bool", example:"true")]
+            new OA\Property(property:"visibility", type:"bool", example:"true"),
+            new OA\Property(property:"started", type:"bool", example:"true/false")]
         )
 )]
     #[OA\Response(
@@ -97,7 +98,8 @@ class EventController extends AbstractController
                     new OA\Property(property: "dateTimeEnd", type: "string", example: "2025-12-01T17:00:00"),
                     new OA\Property(property: "game", type: "string", example: "Tetris"),
                     new OA\Property(property: "image", type: "string", format: "binary", description: "Image de l'événement"),
-                    new OA\Property(property: "visibility", type: "bool", example: "false")
+                    new OA\Property(property: "visibility", type: "bool", example: "false"),
+                    new OA\Property(property: "started", type:"bool", example:"false")
                 ]
             )
         )
@@ -119,7 +121,8 @@ class EventController extends AbstractController
                 new OA\Property(property: "createdBy", type: "string", example: "bibi"),
                 new OA\Property(property: "game", type: "string", example: "Tetris"),
                 new OA\Property(property: "image", type: "string", example: "Lien de l'image"),
-                new OA\Property(property: "visibility", type: "bool", example: "false")
+                new OA\Property(property: "visibility", type: "bool", example: "false"),
+                new OA\Property(property: "started", type:"bool", example:"false")
             ]
         )
     )]
@@ -137,6 +140,11 @@ class EventController extends AbstractController
         if (is_null($visibility)) {
             $visibility = false;
         }
+        $started = $request->request->get('started');
+        $started = filter_var($started, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if (is_null($started)) {
+            $started = false;
+        }
     
         $event = new Event();
         $event->setTitle($title);
@@ -146,6 +154,7 @@ class EventController extends AbstractController
         $event->setDateTimeEnd(new \DateTime($dateTimeEnd));
         $event->setGame($game);
         $event->setVisibility($visibility);
+        $event->setStarted($started);
         
         /** @var UploadedFile $imageFile */
         $imageFile = $request->files->get('image');
@@ -212,7 +221,9 @@ class EventController extends AbstractController
             new OA\Property(property:"createdBy", type:"string", example:"bibi"),
             new OA\Property(property:"game", type:"string", example:"Tetris"),
             new OA\Property(property:"image", type:"string", example:"Lien de l'image, non obligatoire"),
-            new OA\Property(property:"visibility", type:"bool", example:"true")]
+            new OA\Property(property:"visibility", type:"bool", example:"true"),
+            new OA\Property(property:"started", type:"bool", example:"true/false")
+            ]
         )
 )]
     #[OA\Response(
@@ -251,7 +262,6 @@ class EventController extends AbstractController
                     new OA\Property(property: "dateTimeStart", type: "string", example: "2025-12-01T16:00:00"),
                     new OA\Property(property: "dateTimeEnd", type: "string", example: "2025-12-01T18:00:00"),
                     new OA\Property(property: "game", type: "string", example: "Tetris"),
-                    new OA\Property(property: "visibility", type: "boolean", example: "true")
                 ]
             )
         )
@@ -292,12 +302,8 @@ class EventController extends AbstractController
         if (isset($data['game'])) {
             $event->setGame($data['game']);
         }
-        if (isset($data['visibility'])) {
-            $event->setVisibility(filter_var($data['visibility'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE));
-        }
 
         $this->manager->flush();
-
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
     
@@ -618,6 +624,8 @@ class EventController extends AbstractController
                         new OA\Property(property: "description", type: "string", description: "Description de l'événement"),
                         new OA\Property(property: "game", type:"string", example:"Tetris"),
                         new OA\Property(property: "createdAt", type: "string", format: "date-time", description: "Date de création de l'évent"),
+                        new OA\Property(property: "started", type:"bool", example:"true/false")
+                        
                     ])
             )
         )
@@ -698,6 +706,7 @@ class EventController extends AbstractController
                         new OA\Property(property: "createdAt", type: "string", format: "date-time", description: "Date de création de l'événement"),
                         new OA\Property(property: "createdBy", type: "string", description: "Identifiant de l'utilisateur qui a créé l'événement"),
                         new OA\Property(property: "game", type:"string", example:"Tetris"),
+                        new OA\Property(property: "started", type:"bool", example:"true/false")
                     ]
                 )
         )
@@ -774,6 +783,7 @@ class EventController extends AbstractController
                     new OA\Property(property: "createdAt", type: "string", format: "date-time", description: "Date de création de l'événement"),
                     new OA\Property(property: "createdBy", type: "string", description: "Identifiant de l'utilisateur qui a créé l'événement"),
                     new OA\Property(property:"game", type:"string", example:"Tetris"),
+                    new OA\Property(property: "started", type:"bool", example:"true/false"),
                     new OA\Property(
                         property: "participants",
                         type: "object",
@@ -994,7 +1004,7 @@ class EventController extends AbstractController
         tags: ["Admin"])]
     #[OA\Response(
         response:200,
-        description:"Evènement afficher avec sucés.",
+        description:"Evènement afficher avec succés.",
         content: new OA\JsonContent(
             type:"object",
             properties : [new OA\Property(property:"title", type:"string", example:"Nouveau nom de l'évènement"),
@@ -1005,7 +1015,8 @@ class EventController extends AbstractController
             new OA\Property(property:"game", type:"string", example:"Tetris"),
             new OA\Property(property: "createdBy", type: "string", description: "Identifiant de l'utilisateur qui a créé l'événement"),
             new OA\Property(property:"image", type:"string", example:"Lien de l'image, non obligatoire"),
-            new OA\Property(property:"visibility", type:"bool", example:"false")])
+            new OA\Property(property:"visibility", type:"bool", example:"false"),
+            new OA\Property(property: "started", type:"bool", example:"true/false")])
     )]
     
     #[OA\Response(
@@ -1095,5 +1106,76 @@ class EventController extends AbstractController
         return new JsonResponse($response['data'], $response['status']);
     }
     
+    #[Route('/my-created-events/{id}', name: 'user_created_events_id', methods: ['PUT'])]
+    #[IsGranted('ROLE_ORGANISATEUR')]
+    #[OA\Put(
+        path: '/api/my-created-events/{id}',
+        summary: "Valider ou modifier de lancement d'un évènement",
+        tags: ["Event Utilisateur"],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                in: 'path',
+                required: true,
+                description: 'ID de l\'évènement à modifier',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            description: "Nouvelles données de l'évènement à mettre à jour",
+            content: new OA\JsonContent(
+                type: 'object',
+                properties: [
+                    new OA\Property(property: "started", type: "bool", example: true)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 204,
+                description: 'Evènement modifié avec succès'
+            ),
+            new OA\Response(
+                response: 403,
+                description: 'Permission refusée: seul le créateur de l\'événement peut le modifier'
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Evènement non trouvé'
+            )
+        ]
+    )]
+    public function editStarted(int $id, Request $request): JsonResponse
+    {
+        $event = $this->repository->find($id);
+        $currentUser = $this->getUser();
+    
+        if (!$event) {
+            return new JsonResponse(['message' => 'Evènement non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+    
+        if (!$currentUser || $event->getCreatedBy() !== $currentUser->getUserIdentifier()) {
+            return new JsonResponse(['message' => 'Permission refusée: seul le créateur de l\'événement peut le modifier'], Response::HTTP_FORBIDDEN);
+        }
+    
+        $data = json_decode($request->getContent(), true);
+    
+        if (!isset($data['started'])) {
+            return new JsonResponse(['message' => 'Paramètre de lancement manquant'], Response::HTTP_BAD_REQUEST);
+        }
+    
+        if (!is_bool($data['started'])) {
+            return new JsonResponse(['message' => 'Paramètre de lancement invalide, attendu un booléen'], Response::HTTP_BAD_REQUEST);
+        }
+        if ($data['started'] === true && $event->isVisibility() === false) {
+            return new JsonResponse(['message' => 'Impossible de lancer un événement dont la visibilité est désactivée'], Response::HTTP_BAD_REQUEST);
+        }
+    
+        $event->setStarted($data['started']);
+        $this->manager->flush();
+    
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
     
 }

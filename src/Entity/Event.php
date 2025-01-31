@@ -72,6 +72,10 @@ class Event
     #[Groups(["user_events"])]
     private ?string $game = null;
 
+    #[ORM\Column]
+    #[Groups(["user_events", "participant_details"])]
+    private ?bool $started = null;
+
     public function __construct()
     {
         $this->blacklist = new ArrayCollection();
@@ -217,6 +221,18 @@ class Event
     public function setGame(string $game): static
     {
         $this->game = $game;
+
+        return $this;
+    }
+
+    public function isStarted(): ?bool
+    {
+        return $this->started;
+    }
+
+    public function setStarted(bool $started): static
+    {
+        $this->started = $started;
 
         return $this;
     }
