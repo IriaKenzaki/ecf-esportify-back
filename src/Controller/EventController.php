@@ -1169,7 +1169,7 @@ class EventController extends AbstractController
             return new JsonResponse(['message' => 'Paramètre de lancement invalide, attendu un booléen'], Response::HTTP_BAD_REQUEST);
         }
         if ($data['started'] === true && $event->isVisibility() === false) {
-            return new JsonResponse(['message' => 'Impossible de lancer un événement dont la visibilité est désactivée'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['message' => "Impossible de lancer un événement qui n'as pas étais validé par un administrateur"], Response::HTTP_BAD_REQUEST);
         }
     
         $event->setStarted($data['started']);
