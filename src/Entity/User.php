@@ -20,7 +20,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: "IDENTITY")]
     #[ORM\Column(type: "integer")]
-    #[Groups("participant_details","user_details")]
+    #[Groups("user_details", "participant_details")]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -41,7 +41,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column(length: 64, nullable: true, unique: true)]
-    #[Groups("participant_details", "user_details")]
+    #[Groups("user_details", "participant_details")]
     private ?string $username = null;
 
     #[ORM\Column(length: 255, unique: true)]

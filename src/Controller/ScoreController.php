@@ -27,7 +27,6 @@ class ScoreController extends AbstractController{
         private UserRepository $userRepository){}
 
     #[Route('/{eventId}/add-scores', name: 'add_scores', methods: 'POST')]
-    #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Post(
         path: "/api/{eventId}/add-scores",
         summary: "Ajouter des scores pour un événement",
