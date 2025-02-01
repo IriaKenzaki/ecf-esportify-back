@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 class SmokeTest extends WebTestCase
 {
@@ -41,7 +42,7 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->followRedirects(false);
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'andi@arthe.com',
             'password' => '@ndya23',
         ], JSON_THROW_ON_ERROR));
@@ -54,7 +55,7 @@ class SmokeTest extends WebTestCase
     public function testGetTheListOfUser(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'armin@admin.com',
             'password' => 'arm1npa$$',
         ], JSON_THROW_ON_ERROR), 'GET', '/api/admin/users');
@@ -66,7 +67,7 @@ class SmokeTest extends WebTestCase
     {
         $client = self::createClient();
         $client->followRedirects(false);
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'armin@admin.com',
             'password' => 'arm1npa$$',
         ], JSON_THROW_ON_ERROR), 'POST', 'api/registration', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -82,7 +83,7 @@ class SmokeTest extends WebTestCase
     public function testAccountMeIsSuccessfulWithAValidUser(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'andi@arthe.com',
             'password' => '@ndya23',
         ], JSON_THROW_ON_ERROR), 'GET', '/api/account/me');
@@ -94,7 +95,7 @@ class SmokeTest extends WebTestCase
     public function testCreateAEventAndShowAllEventIsSuccessful(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'camille@orga.com',
             'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -113,7 +114,7 @@ class SmokeTest extends WebTestCase
     public function testCreateAEventAndDeleteIt(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'camille@orga.com',
             'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -133,7 +134,7 @@ class SmokeTest extends WebTestCase
     public function testCreateAEventAndEditIt(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'camille@orga.com',
             'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -160,7 +161,7 @@ class SmokeTest extends WebTestCase
     public function testCreateAEventAddAndRemoveParticipant(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'camille@orga.com',
             'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -179,7 +180,7 @@ class SmokeTest extends WebTestCase
     public function testCreateAEventAddAndShowParticipant(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'camille@orga.com',
             'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -198,7 +199,7 @@ class SmokeTest extends WebTestCase
     public function testCreateAEventAndShowMyEvent(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'camille@orga.com',
             'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -217,7 +218,7 @@ class SmokeTest extends WebTestCase
     public function testCreateAEventAndShowMyCreateEvent(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'camille@orga.com',
             'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -236,7 +237,7 @@ class SmokeTest extends WebTestCase
     public function testCreateAEventAddAndShowMyCreateEventParticipants(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'camille@orga.com',
             'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -255,7 +256,7 @@ class SmokeTest extends WebTestCase
     public function testShowNotVisibleEvent(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'armin@admin.com',
             'password' => 'arm1npa$$',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -274,7 +275,7 @@ class SmokeTest extends WebTestCase
     public function testEditVisiblityOfEvent(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'armin@admin.com',
             'password' => 'arm1npa$$',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -294,7 +295,7 @@ class SmokeTest extends WebTestCase
     public function testAddScores(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'camille@orga.com',
             'password' => 'c@mw0rd',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -315,7 +316,7 @@ class SmokeTest extends WebTestCase
     public function testShowScores(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'andi@arthe.com',
             'password' => '@ndya23',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -336,7 +337,7 @@ class SmokeTest extends WebTestCase
     public function testShowDashboard(): void
     {
         $client = self::createClient();
-        $client->request('POST', 'api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
             'username' => 'armin@admin.com',
             'password' => 'arm1npa$$',
         ], JSON_THROW_ON_ERROR),'POST', '/api/event', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
@@ -350,8 +351,35 @@ class SmokeTest extends WebTestCase
 
             $statusCode = $client->getResponse()->getStatusCode();
             $this->assertEquals(200, $statusCode);
-
     }
 
+    public function testCreateMessage(): void
+    {
+        $client = self::createClient();
+        
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode([
+            'username' => 'armin@admin.com',
+            'password' => 'arm1npa$$',
+        ], JSON_THROW_ON_ERROR),'POST', '/api/contact', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode([
+            'title' => 'Problème de connexion',
+            'text' => 'Je n\'arrive pas à me connecter à mon compte',
+        ], JSON_THROW_ON_ERROR));
+
+    
+        $statusCode = $client->getResponse()->getStatusCode();
+        $this->assertEquals(200 && 201, $statusCode);
+    }
+
+    public function testGetMessages(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', '/api/login', [], [], ['CONTENT_TYPE'=> 'application/json',], json_encode([
+            'username' => 'armin@admin.com',
+            'password' => 'arm1npa$$',
+        ], JSON_THROW_ON_ERROR),'GET', '/api/contact');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertJson($client->getResponse()->getContent());
+    }
 
 }
