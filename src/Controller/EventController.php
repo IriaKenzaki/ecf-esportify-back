@@ -58,7 +58,7 @@ class EventController extends AbstractController
             new OA\Property(property:"visibility", type:"bool", example:"true"),
             new OA\Property(property:"started", type:"bool", example:"true/false")]
         )
-)]
+    )]
     #[OA\Response(
         response:404,
         description:"Aucun évènement n'as étais trouvé.",
@@ -66,10 +66,16 @@ class EventController extends AbstractController
     public function showAll(): JsonResponse
     {
         $events = $this->repository->findAll();
-        $visibleEvents = array_filter($events, fn($event) => $event->isVisibility()=== true);
+        $visibleEvents = array_filter($events, function($event) {
+            $dateTimeEnd = $event->getDateTimeEnd();
+            if (!$dateTimeEnd instanceof \DateTime) {
+                $dateTimeEnd = new \DateTime($dateTimeEnd);
+            }
+            return $event->isVisibility() === true && $dateTimeEnd > new \DateTime();
+        });
+    
         if ($visibleEvents) {
             $responseData = $this->serializer->serialize($visibleEvents, 'json', ['groups' => 'user_events']);
-            
             return new JsonResponse($responseData, Response::HTTP_OK, [], true);
         }
     
@@ -140,18 +146,32 @@ class EventController extends AbstractController
         if (is_null($visibility)) {
             $visibility = false;
         }
+    
         $started = $request->request->get('started');
         $started = filter_var($started, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         if (is_null($started)) {
             $started = false;
+        }
+        
+        $startDateTime = new \DateTime($dateTimeStart);
+        $endDateTime = new \DateTime($dateTimeEnd);
+    
+        if ($startDateTime < new \DateTime()) {
+            return new JsonResponse(['error' => 'La date de début ne peut pas être antérieure à la date actuelle.'], Response::HTTP_BAD_REQUEST);
+        }
+        if ($endDateTime < new \DateTime()) {
+            return new JsonResponse(['error' => 'La date de fin ne peut pas être antérieure à la date actuelle.'], Response::HTTP_BAD_REQUEST);
+        }
+        if ($startDateTime > $endDateTime) {
+            return new JsonResponse(['error' => 'La date de début ne peut pas être après la date de fin.'], Response::HTTP_BAD_REQUEST);
         }
     
         $event = new Event();
         $event->setTitle($title);
         $event->setDescription($description);
         $event->setPlayers($players);
-        $event->setDateTimeStart(new \DateTime($dateTimeStart));
-        $event->setDateTimeEnd(new \DateTime($dateTimeEnd));
+        $event->setDateTimeStart($startDateTime);
+        $event->setDateTimeEnd($endDateTime);
         $event->setGame($game);
         $event->setVisibility($visibility);
         $event->setStarted($started);
@@ -167,7 +187,6 @@ class EventController extends AbstractController
         }
         
         $event->setCreatedAt(new \DateTimeImmutable());
-        
         $currentUser = $this->getUser();
         if (!$currentUser) {
             return new JsonResponse(['error' => 'Utilisateur non connecté'], Response::HTTP_UNAUTHORIZED);
@@ -189,7 +208,6 @@ class EventController extends AbstractController
             ['id' => $event->getId()],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
-        
         return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
@@ -277,13 +295,13 @@ class EventController extends AbstractController
     public function editEvent(int $id, Request $request): JsonResponse
     {
         $event = $this->repository->findOneBy(['id' => $id]);
-
+    
         if (!$event) {
             return new JsonResponse(['error' => 'Événement non trouvé'], Response::HTTP_NOT_FOUND);
         }
-
+    
         $data = json_decode($request->getContent(), true);
-
+    
         if (isset($data['title'])) {
             $event->setTitle($data['title']);
         }
@@ -293,19 +311,32 @@ class EventController extends AbstractController
         if (isset($data['players'])) {
             $event->setPlayers($data['players']);
         }
+    
         if (isset($data['dateTimeStart'])) {
-            $event->setDateTimeStart(new \DateTime($data['dateTimeStart']));
+            $startDateTime = new \DateTime($data['dateTimeStart']);
+            if ($startDateTime < new \DateTime()) {
+                return new JsonResponse(['error' => 'La date de début ne peut pas être antérieure à la date actuelle.'], Response::HTTP_BAD_REQUEST);
+            }
+            $event->setDateTimeStart($startDateTime);
         }
         if (isset($data['dateTimeEnd'])) {
-            $event->setDateTimeEnd(new \DateTime($data['dateTimeEnd']));
+            $endDateTime = new \DateTime($data['dateTimeEnd']);
+            if ($endDateTime < new \DateTime()) {
+                return new JsonResponse(['error' => 'La date de fin ne peut pas être antérieure à la date actuelle.'], Response::HTTP_BAD_REQUEST);
+            }
+            if (isset($startDateTime) && $endDateTime < $startDateTime) {
+                return new JsonResponse(['error' => 'La date de fin ne peut pas être avant la date de début.'], Response::HTTP_BAD_REQUEST);
+            }
+            $event->setDateTimeEnd($endDateTime);
         }
         if (isset($data['game'])) {
             $event->setGame($data['game']);
         }
-
+    
         $this->manager->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
+    
     
     #[Route('/{id}/image', name: 'edit_event_image', methods: ['POST'])]
     #[IsGranted('ROLE_ORGANISATEUR')]
@@ -647,7 +678,7 @@ class EventController extends AbstractController
     {
         $responseData = null;
         $statusCode = Response::HTTP_OK;
-
+    
         $currentUser = $this->getUser();
         if (!$currentUser) {
             $responseData = ['error' => 'User not authenticated'];
@@ -667,11 +698,13 @@ class EventController extends AbstractController
                    ->join('e.listParticipants', 'lp')
                    ->join('lp.participants', 'p')
                    ->where('p.id = :userId')
+                   ->andWhere('e.dateTimeEnd >= :currentDate')
                    ->setParameter('userId', $userId)
+                   ->setParameter('currentDate', new \DateTime())
                    ->orderBy('e.createdAt', 'DESC');
-
+    
                 $events = $qb->getQuery()->getResult();
-
+    
                 if (empty($events)) {
                     $responseData = ['error' => 'No event found for user'];
                     $statusCode = Response::HTTP_NOT_FOUND;
@@ -680,7 +713,7 @@ class EventController extends AbstractController
                 }
             }
         }
-
+    
         return new JsonResponse($responseData, $statusCode, [], $statusCode === Response::HTTP_OK);
     }
 
@@ -688,7 +721,7 @@ class EventController extends AbstractController
     #[IsGranted('ROLE_ORGANISATEUR')]
     #[OA\Get(
         path: "/api/my-created-events",
-        summary: "Récupérer les événements créés par l'utilisateur connecté",
+        summary: "Récupérer les événements créés en cours et terminé par l'utilisateur connecté",
         tags: ["Event Utilisateur"],
         description: "Permet de récupérer la liste des événements créés par l'utilisateur actuellement connecté. Si l'utilisateur n'est pas authentifié, ou si aucun événement n'a été créé par cet utilisateur, une erreur sera retournée.",
     )]
@@ -727,7 +760,7 @@ class EventController extends AbstractController
     {
         $responseData = null;
         $statusCode = Response::HTTP_OK;
-
+    
         $currentUser = $this->getUser();
         if (!$currentUser) {
             $responseData = ['error' => 'User not authenticated'];
@@ -747,9 +780,9 @@ class EventController extends AbstractController
                    ->where('e.createdBy = :createdBy')
                    ->setParameter('createdBy', $currentUserIdentifier)
                    ->orderBy('e.createdAt', 'DESC');
-
+    
                 $events = $qb->getQuery()->getResult();
-
+    
                 if (empty($events)) {
                     $responseData = ['error' => 'No events found for user'];
                     $statusCode = Response::HTTP_NOT_FOUND;
@@ -758,7 +791,6 @@ class EventController extends AbstractController
                 }
             }
         }
-
         return new JsonResponse($responseData, $statusCode, [], $statusCode === Response::HTTP_OK);
     }
 
@@ -817,14 +849,14 @@ class EventController extends AbstractController
     )]
     public function getMyEventParticipants(EntityManagerInterface $manager, SerializerInterface $serializer): JsonResponse
     {
-            $currentUser = $this->getUser();
-
+        $currentUser = $this->getUser();
+    
         if (!$currentUser || !$currentUser instanceof User) {
             return new JsonResponse(['error' => 'User not authenticated or invalid'], Response::HTTP_UNAUTHORIZED);
         }
-
+    
         $currentUserIdentifier = $currentUser->getUserIdentifier();
-
+    
         $qb = $manager->createQueryBuilder();
         $qb->select('e', 'lp', 'p', 'b')
            ->from(Event::class, 'e')
@@ -832,16 +864,17 @@ class EventController extends AbstractController
            ->leftJoin('lp.participants', 'p')
            ->leftJoin('e.blacklist', 'b')
            ->where('e.createdBy = :createdBy')
+           ->andWhere('e.dateTimeEnd >= :currentDate')
            ->setParameter('createdBy', $currentUserIdentifier)
+           ->setParameter('currentDate', new \DateTime())
            ->orderBy('e.createdAt', 'DESC');
-
+    
         $events = $qb->getQuery()->getResult();
-
-        
+    
         if (empty($events)) {
             return new JsonResponse(['error' => 'No events found for user'], Response::HTTP_NOT_FOUND);
         }
-
+    
         $responseData = $serializer->serialize($events, 'json', ['groups' => ['participant_details', 'blacklist_details']]);
         return new JsonResponse($responseData, Response::HTTP_OK, [], true);
     }
@@ -1000,7 +1033,7 @@ class EventController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     #[OA\Get(
         path: "/api/all/not-visible",
-        summary: "Afficher touts les events en cours non validés",
+        summary: "Afficher touts les events en cours et terminé non validés",
         tags: ["Admin"])]
     #[OA\Response(
         response:200,
@@ -1154,9 +1187,11 @@ class EventController extends AbstractController
         if (!$event) {
             return new JsonResponse(['message' => 'Evènement non trouvé'], Response::HTTP_NOT_FOUND);
         }
-    
         if (!$currentUser || $event->getCreatedBy() !== $currentUser->getUserIdentifier()) {
             return new JsonResponse(['message' => 'Permission refusée: seul le créateur de l\'événement peut le modifier'], Response::HTTP_FORBIDDEN);
+        }
+        if ($event->getDateTimeEnd() < new \DateTime()) {
+            return new JsonResponse(['message' => 'Impossible de modifier le lancement d\'un événement dont la date de fin est déjà passée'], Response::HTTP_BAD_REQUEST);
         }
     
         $data = json_decode($request->getContent(), true);
@@ -1164,12 +1199,11 @@ class EventController extends AbstractController
         if (!isset($data['started'])) {
             return new JsonResponse(['message' => 'Paramètre de lancement manquant'], Response::HTTP_BAD_REQUEST);
         }
-    
         if (!is_bool($data['started'])) {
             return new JsonResponse(['message' => 'Paramètre de lancement invalide, attendu un booléen'], Response::HTTP_BAD_REQUEST);
         }
         if ($data['started'] === true && $event->isVisibility() === false) {
-            return new JsonResponse(['message' => "Impossible de lancer un événement qui n'as pas étais validé par un administrateur"], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['message' => "Impossible de lancer un événement qui n'a pas été validé par un administrateur"], Response::HTTP_BAD_REQUEST);
         }
     
         $event->setStarted($data['started']);
