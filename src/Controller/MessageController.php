@@ -87,6 +87,7 @@ class MessageController extends AbstractController
             items: new OA\Items(
                 type: "object",
                 properties: [
+                    new OA\Property(property: "id", type: "integer", example: "1"),
                     new OA\Property(property: "user", type: "string", example: "john_doe"),
                     new OA\Property(property: "title", type: "string", example: "Problème de connexion"),
                     new OA\Property(property: "text", type: "string", example: "Je n'arrive pas à me connecter à mon compte"),
@@ -101,6 +102,7 @@ class MessageController extends AbstractController
 
         foreach ($messages as $message) {
             $data[] = [
+                'id' => $message->getId(),
                 'user' => $message->getUser(),
                 'title' => $message->getTitle(),
                 'text' => $message->getText(),
@@ -109,5 +111,49 @@ class MessageController extends AbstractController
 
         return new JsonResponse($data);
     }
+
+    #[Route('/contact/{id}', methods: ['DELETE'])] 
+    #[IsGranted('ROLE_ADMIN')]
+    #[OA\Delete(
+        path: "/api/contact/{id}",
+        summary: "Supprimer un message",
+        tags: ["Contact"],)]
+        #[OA\Parameter(
+            name:"id",
+            in:"path",
+            required:true,
+            description:"Id du message que vous voulez afficher",
+            schema: new OA\Schema(type: "integer"))]
+    #[OA\Response(
+        response: 200,
+        description: "Message supprimé avec succès",
+        content: new OA\JsonContent(
+            type: "object",
+            properties: [
+                new OA\Property(property: "message", type: "string", example: "Message supprimé avec succès")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: "Message non trouvé"
+    )]
+    public function deleteMessage(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        // Récupérer le message avec l'ID
+        $message = $em->getRepository(Message::class)->find($id);
+    
+        // Vérifier si le message existe
+        if (!$message) {
+            return new JsonResponse(['error' => 'Message non trouvé'], JsonResponse::HTTP_NOT_FOUND);
+        }
+    
+        // Supprimer le message
+        $em->remove($message);
+        $em->flush();
+    
+        return new JsonResponse(['message' => 'Message supprimé avec succès'], JsonResponse::HTTP_OK);
+    }
+
 
 }
