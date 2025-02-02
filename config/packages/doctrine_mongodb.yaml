@@ -3,7 +3,7 @@ doctrine_mongodb:
     auto_generate_hydrator_classes: true
     connections:
         default:
-            server: 'mongodb://Iria:Iriu1993!@localhost:27017/'
+            server: 'mongodb://Iria:Iriu1993!@localhost:27017/avis_database'
             options: {}
     default_database: 'avis_database'
     document_managers:
