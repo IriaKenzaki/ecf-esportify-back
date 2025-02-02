@@ -39,3 +39,5 @@ hooks:
     deploy: |
         set -x -e
         symfony-deploy
+        # Extraire les credentials MongoDB depuis PLATFORM_RELATIONSHIPS
+        export MONGODB_URL=$(echo $PLATFORM_RELATIONSHIPS | jq -r '.mongodb[0] | "mongodb://\(.username):\(.password)@\(.host):\(.port)/main"')
