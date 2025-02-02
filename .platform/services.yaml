@@ -3,5 +3,5 @@
         disk: 512 
     
     mongodb:
-        type: "mongodb:4.0"  
+        type: "mongodb:4.2"  
         disk: 4096
