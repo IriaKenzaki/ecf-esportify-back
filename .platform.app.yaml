@@ -30,9 +30,6 @@ relationships:
     database: "database:mysql"
     mongodb: "mongodb:mongodb"
 
-variables:
-    env:
-        MONGODB_URL: ""    
 
 hooks:
     build: |
