@@ -1,7 +1,7 @@
     database:
         type: "mysql:10.6"
-        disk: 4096 
+        disk: 2100 
     
     mongodb:
         type: "mongodb:4.0"  
-        disk: 4096
+        disk: 3000
