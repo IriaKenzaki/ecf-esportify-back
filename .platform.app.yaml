@@ -25,6 +25,7 @@ web:
 
 mounts:
     "/var": { source: local, source_path: var }
+    "/app/public/uploads/images": { source: local, source_path: uploads/images }
 
 relationships:
     database: "database:mysql"
