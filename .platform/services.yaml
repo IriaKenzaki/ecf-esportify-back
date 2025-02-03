@@ -4,4 +4,4 @@
     
     mongodb:
         type: "mongodb:4.0"  
-        disk: 3000
+        disk: 2000
