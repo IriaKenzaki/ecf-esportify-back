@@ -134,6 +134,7 @@ class EventController extends AbstractController
     )]
     public function new(Request $request): JsonResponse
     {
+        // Récupération des données du formulaire
         $title = $request->request->get('title');
         $description = $request->request->get('description');
         $players = $request->request->get('players');
@@ -146,26 +147,37 @@ class EventController extends AbstractController
         if (is_null($visibility)) {
             $visibility = false;
         }
-    
+        
         $started = $request->request->get('started');
         $started = filter_var($started, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         if (is_null($started)) {
             $started = false;
         }
         
-        $startDateTime = new \DateTime($dateTimeStart);
-        $endDateTime = new \DateTime($dateTimeEnd);
+        // Récupération du fuseau horaire de l'utilisateur
+        // Tu peux récupérer cela via la session, ou à partir de l'utilisateur, ici je suppose que tu l'as dans la requête ou une variable
+        $timezone = new \DateTimeZone('Europe/Paris'); // Remplace par la logique pour obtenir le fuseau horaire de l'utilisateur
     
-        if ($startDateTime < new \DateTime()) {
+        // Convertir les dates envoyées en fonction du fuseau horaire
+        $startDateTime = new \DateTime($dateTimeStart, new \DateTimeZone('UTC')); // Utilise UTC pour la date de base
+        $endDateTime = new \DateTime($dateTimeEnd, new \DateTimeZone('UTC'));
+    
+        // Convertir la date en fonction du fuseau horaire local
+        $startDateTime->setTimezone($timezone);
+        $endDateTime->setTimezone($timezone);
+        
+        // Vérification des dates
+        if ($startDateTime < new \DateTime('now', $timezone)) {
             return new JsonResponse(['error' => 'La date de début ne peut pas être antérieure à la date actuelle.'], Response::HTTP_BAD_REQUEST);
         }
-        if ($endDateTime < new \DateTime()) {
+        if ($endDateTime < new \DateTime('now', $timezone)) {
             return new JsonResponse(['error' => 'La date de fin ne peut pas être antérieure à la date actuelle.'], Response::HTTP_BAD_REQUEST);
         }
         if ($startDateTime > $endDateTime) {
             return new JsonResponse(['error' => 'La date de début ne peut pas être après la date de fin.'], Response::HTTP_BAD_REQUEST);
         }
-    
+        
+        // Création de l'événement
         $event = new Event();
         $event->setTitle($title);
         $event->setDescription($description);
@@ -176,6 +188,7 @@ class EventController extends AbstractController
         $event->setVisibility($visibility);
         $event->setStarted($started);
         
+        // Gestion de l'image
         /** @var UploadedFile $imageFile */
         $imageFile = $request->files->get('image');
         if ($imageFile) {
@@ -194,13 +207,16 @@ class EventController extends AbstractController
         
         $event->setCreatedBy($currentUser->getUserIdentifier());
         
+        // Ajout de la participation à la liste
         $listParticipant = new ListParticipant();
         $listParticipant->setEvent($event);
         
+        // Enregistrement de l'événement et de la liste des participants
         $this->manager->persist($event);
         $this->manager->persist($listParticipant);
         $this->manager->flush();
         
+        // Sérialisation de la réponse
         $responseData = $this->serializer->serialize($event, 'json');
         
         $location = $this->urlGenerator->generate(
@@ -208,6 +224,7 @@ class EventController extends AbstractController
             ['id' => $event->getId()],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
+        
         return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
