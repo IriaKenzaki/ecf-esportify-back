@@ -23,15 +23,18 @@ web:
             expires: 1h
             passthru: "/index.php"
 
+        "/uploads/images/":
+            root: "/mnt/uploads/images"
+            allow: true
+            expires: 1h
+
 mounts:
     "/var": { source: local, source_path: var }
     "/mnt/uploads": { source: local, source_path: uploads }
 
-
 relationships:
     database: "database:mysql"
     mongodb: "mongodb:mongodb"
-
 
 hooks:
     build: |
