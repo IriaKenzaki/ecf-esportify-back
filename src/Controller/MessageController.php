@@ -56,10 +56,12 @@ class MessageController extends AbstractController
             return new JsonResponse(['error' => 'Données incomplètes'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
+        $username = $user->getUsername() ?: $user->getEmail();
         $message = new Message();
-        $message->setUser($user->getUsername());
+        $message->setUser($username);
         $message->setTitle($data['title']);
         $message->setText($data['text']);
+
 
         $currentUser = $this->getUser();
         if (!$currentUser) {
