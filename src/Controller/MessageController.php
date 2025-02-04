@@ -142,15 +142,12 @@ class MessageController extends AbstractController
     )]
     public function deleteMessage(int $id, EntityManagerInterface $em): JsonResponse
     {
-        // Récupérer le message avec l'ID
         $message = $em->getRepository(Message::class)->find($id);
     
-        // Vérifier si le message existe
         if (!$message) {
             return new JsonResponse(['error' => 'Message non trouvé'], JsonResponse::HTTP_NOT_FOUND);
         }
     
-        // Supprimer le message
         $em->remove($message);
         $em->flush();
     
