@@ -332,7 +332,6 @@ class EventController extends AbstractController
         if (isset($data['game'])) {
             $event->setGame($data['game']);
         }
-
         $event->setVisibility(false);
         $this->manager->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
