@@ -35,7 +35,9 @@ class SecurityController extends AbstractController
             description:"Données de l'utilisateur à inscrire",
             content: new OA\JsonContent(
                 type:"object",
-                properties:[new OA\Property(property:"email", type:"string", example:"adresse@email.com"),
+                properties:[
+                new OA\Property(property:"email", type:"string", example:"adresse@email.com"),
+                new OA\Property(property:"username", type:"string", example:"Caliga"),
                 new OA\Property(property:"password", type:"string", example:"Mot de passe")]
             ))]
     #[OA\Response(
@@ -45,6 +47,7 @@ class SecurityController extends AbstractController
             type:"object",
             properties : [
             new OA\Property(property:"user", type:"string", example:"Mail d'utilisateur"),
+            new OA\Property(property:"username", type:"string", example:"Caliga"),
             new OA\Property(property:"apiToken", type:"string", example:"31a023e212f116124a36af1r4ea0c1c3806b9378"),
             new OA\Property(property:"roles", type:"array", items:new OA\Items(type:"string", example:"ROLE_USER"))
             ]
@@ -53,13 +56,19 @@ class SecurityController extends AbstractController
     public function register(Request $request, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
         $user = $this->serializer->deserialize($request->getContent(), User::class, 'json');
+        if (!$user->getUsername()) {
+            $user->setUsername($user->getEmail());
+        }
         $user->setPassword($passwordHasher->hashPassword($user, $user->getPassword()));
         $user->setCreatedAt(new DateTimeImmutable());
 
         $this->manager->persist($user);
         $this->manager->flush();
         return new JsonResponse(
-            ['user'  => $user->getEmail(), 'apiToken' => $user->getApiToken(), 'roles' => $user->getRoles()],
+            ['user'  => $user->getEmail(), 
+            'username' => $user->getUsername(), 
+            'apiToken' => $user->getApiToken(), 
+            'roles' => $user->getRoles()],
             Response::HTTP_CREATED
         );
     }
