@@ -178,19 +178,22 @@ class EventController extends AbstractController
         
         /** @var UploadedFile $imageFile */
         $imageFile = $request->files->get('image');
-        if ($imageFile) {
-            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            if (!in_array($imageFile->getMimeType(), $allowedMimeTypes)) {
-                throw new \Exception('Type de fichier non autorisé.');
-            }
 
-            $imageFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
+        if ($imageFile) {
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $extension = strtolower($imageFile->getClientOriginalExtension());
+        
+            if (!in_array($extension, $allowedExtensions)) {
+                throw new \Exception('Extension de fichier non autorisée.');
+            }
+        
+            $imageFilename = uniqid() . '.' . $extension;
             $imageFile->move($this->getParameter('images_directory'), $imageFilename);
             $event->setImage($imageFilename);
         } else {
             $event->setImage(null);
         }
-        
+
         $event->setCreatedAt(new \DateTimeImmutable());
         $currentUser = $this->getUser();
         if (!$currentUser) {
@@ -379,20 +382,23 @@ class EventController extends AbstractController
             return new JsonResponse(['error' => 'Événement non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
+        /** @var UploadedFile $imageFile */
         $imageFile = $request->files->get('image');
-        if ($imageFile) {
-            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            if (!in_array($imageFile->getMimeType(), $allowedMimeTypes)) {
-                return new JsonResponse(['error' => 'Type de fichier non autorisé.'], Response::HTTP_BAD_REQUEST);
-            }
 
-            $imageFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
+        if ($imageFile) {
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $extension = strtolower($imageFile->getClientOriginalExtension());
+        
+            if (!in_array($extension, $allowedExtensions)) {
+                throw new \Exception('Extension de fichier non autorisée.');
+            }
+        
+            $imageFilename = uniqid() . '.' . $extension;
             $imageFile->move($this->getParameter('images_directory'), $imageFilename);
             $event->setImage($imageFilename);
-
-            $this->manager->flush();
+        } else {
+            $event->setImage(null);
         }
-
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
