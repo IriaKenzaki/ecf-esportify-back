@@ -20,7 +20,7 @@ class UserFixtures extends Fixture
         $adminUser->setUsername('Armin')
                   ->setEmail('armin@admin.com')
                   ->setRoles(['ROLE_ADMIN'])
-                  ->setPassword($this->passwordHasher->hashPassword($adminUser, 'arm1npa$$'));
+                  ->setPassword($this->passwordHasher->hashPassword($adminUser, 'Arm1npa$$'));
 
         $orgaUser = new User();
         $orgaUser->setUsername('Camille')
