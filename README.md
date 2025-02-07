@@ -56,10 +56,27 @@ MONGODB_DB=esportify
 ```
 
 5. **Créer le schéma de la base de données MySQL**
-
+   
 ```bash
   php bin/console doctrine:migrations:migrate
 ```
+   
+7. **Lancé des DataFixture**
+
+```bash
+  php bin/console d:f:l
+```
+Ce qui vas crée 3 compte utilisateur 
+
+Joueur: Pseudo : Andréa
+        Email : andi@player.com
+        Mot de passe : @ndyA23!
+Organisateur: Pseudo : Camille
+              Email : camille@orga.com
+              Mot de passe : C@mpa$$w0rd
+Administrateur: Pseudo : Armin
+                Email : armin@admin.com
+                Mot de passe : Arm1npa$$
 
 6. **Démarrer le serveur Symfony**
 
