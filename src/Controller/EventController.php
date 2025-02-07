@@ -178,14 +178,22 @@ class EventController extends AbstractController
         
         /** @var UploadedFile $imageFile */
         $imageFile = $request->files->get('image');
+
         if ($imageFile) {
-            $imageFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $extension = strtolower($imageFile->getClientOriginalExtension());
+        
+            if (!in_array($extension, $allowedExtensions)) {
+                throw new \Exception('Extension de fichier non autorisée.');
+            }
+        
+            $imageFilename = uniqid() . '.' . $extension;
             $imageFile->move($this->getParameter('images_directory'), $imageFilename);
             $event->setImage($imageFilename);
         } else {
             $event->setImage(null);
         }
-        
+
         $event->setCreatedAt(new \DateTimeImmutable());
         $currentUser = $this->getUser();
         if (!$currentUser) {
@@ -369,19 +377,28 @@ class EventController extends AbstractController
     public function editEventImage(int $id, Request $request): JsonResponse
     {
         $event = $this->repository->findOneBy(['id' => $id]);
-    
+
         if (!$event) {
             return new JsonResponse(['error' => 'Événement non trouvé'], Response::HTTP_NOT_FOUND);
         }
-    
+
+        /** @var UploadedFile $imageFile */
         $imageFile = $request->files->get('image');
+
         if ($imageFile) {
-            $imageFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $extension = strtolower($imageFile->getClientOriginalExtension());
+        
+            if (!in_array($extension, $allowedExtensions)) {
+                throw new \Exception('Extension de fichier non autorisée.');
+            }
+        
+            $imageFilename = uniqid() . '.' . $extension;
             $imageFile->move($this->getParameter('images_directory'), $imageFilename);
             $event->setImage($imageFilename);
-            $this->manager->flush();
+        } else {
+            $event->setImage(null);
         }
-    
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 

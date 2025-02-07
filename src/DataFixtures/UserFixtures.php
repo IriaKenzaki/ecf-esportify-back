@@ -26,13 +26,13 @@ class UserFixtures extends Fixture
         $orgaUser->setUsername('Camille')
              ->setEmail('camille@orga.com')
              ->setRoles(['ROLE_ORGANISATEUR'])
-             ->setPassword($this->passwordHasher->hashPassword($orgaUser, 'c@mw0rd'));
+             ->setPassword($this->passwordHasher->hashPassword($orgaUser, 'C@mpa$$w0rd'));
 
              $user = new User();
              $user->setUsername('Andréa')
-                  ->setEmail('andi@arthe.com')
+                  ->setEmail('andi@player.com')
                   ->setRoles(['ROLE_USER'])
-                  ->setPassword($this->passwordHasher->hashPassword($orgaUser, '@ndya23'));
+                  ->setPassword($this->passwordHasher->hashPassword($orgaUser, '@ndyA23!'));
 
         $manager->persist($user);
         $manager->persist($adminUser);
