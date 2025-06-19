@@ -42,6 +42,7 @@ hooks:
         set -x -e
         curl -fs https://get.symfony.com/cloud/configurator | bash
         NODE_VERSION=18 symfony-build
+        composer install --prefer-dist --no-scripts --no-progress --no-ansi --no-interaction --ignore-platform-req=ext-mongodb
 
     deploy: |
         set -x -e
